@@ -34,7 +34,7 @@ const submit = () => {
         <div class="min-h-screen flex items-center justify-center bg-cover bg-center" 
             style="background-image: url('/images/background.png');">
             
-            <div class="bg-[#43B610] text-white p-8 rounded-lg shadow-md w-full max-w-md">
+            <div class="bg-[#209800] text-white p-8 rounded-lg shadow-md w-full max-w-md">
                 <Head title="Log in" />
 
                 <div v-if="status" class="mb-4 text-sm font-medium text-green-600">
