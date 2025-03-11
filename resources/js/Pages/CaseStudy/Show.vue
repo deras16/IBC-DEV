@@ -3,6 +3,7 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import PrimaryButton from "@/Components/Core/Button/PrimaryButton.vue";
 import DangerButton from "@/Components/Core/Button/DangerButton.vue";
+import {router} from "@inertiajs/vue3";
 
 const props = defineProps({
     caseStudy: {
@@ -13,7 +14,7 @@ const props = defineProps({
 </script>
 
 <template>
-    <AuthenticatedLayout title="Dashboard">
+    <AuthenticatedLayout title="Show Case Study">
         <template #header>
             <h2
                 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200"
@@ -66,7 +67,9 @@ const props = defineProps({
                             </dl>
 
                             <div class="mt-6 flex items-center justify-end space-x-4">
-                                <PrimaryButton>Update Case Study</PrimaryButton>
+                                <PrimaryButton @click="() => router.get(route('case-studies.edit',props.caseStudy.id), {}, { preserveState:true , replace:true })">
+                                    Update Case Study
+                                </PrimaryButton>
                                 <DangerButton>Delete Case Study</DangerButton>
                             </div>
                         </div>
