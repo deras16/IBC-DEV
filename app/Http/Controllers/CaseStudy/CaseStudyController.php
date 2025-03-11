@@ -7,6 +7,7 @@ use App\Enums\SpaceType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CaseStudy\CaseStudyRequest;
 use App\Models\CaseStudy;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -29,7 +30,7 @@ class CaseStudyController extends Controller
      */
     public function create() : Response
     {
-        return  Inertia::render('CaseStudy/Create', [
+        return  Inertia::render('CaseStudy/Forms/CreateEdit', [
             'spaceTopics' => SpaceTopic::cases(),
             'spaceTypes' => SpaceType::cases()
         ]);
@@ -38,9 +39,10 @@ class CaseStudyController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(CaseStudyRequest $request)
+    public function store(CaseStudyRequest $request): RedirectResponse
     {
-        //
+        CaseStudy::create($request->validated());
+        return redirect()->route('case-studies.index');
     }
 
     /**
@@ -56,17 +58,22 @@ class CaseStudyController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(CaseStudy $caseStudy)
+    public function edit(CaseStudy $caseStudy) : Response
     {
-        //
+        return Inertia::render('CaseStudy/Forms/CreateEdit', [
+            'caseStudy' => $caseStudy,
+            'spaceTopics' => SpaceTopic::cases(),
+            'spaceTypes' => SpaceType::cases()
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(CaseStudyRequest $request, CaseStudy $caseStudy)
+    public function update(CaseStudyRequest $request, CaseStudy $caseStudy): RedirectResponse
     {
-        //
+        $caseStudy->update($request->validated());
+        return redirect()->route('case-studies.index');
     }
 
     /**
