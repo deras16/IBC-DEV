@@ -5,10 +5,13 @@ namespace App\Http\Controllers\CaseStudy;
 use App\Enums\SpaceTopic;
 use App\Enums\SpaceType;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\CaseStudy\CaseStudyFileRequest;
 use App\Http\Requests\CaseStudy\CaseStudyRequest;
 use App\Models\CaseStudy;
+use App\Models\File;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -51,7 +54,7 @@ class CaseStudyController extends Controller
     public function show(CaseStudy $caseStudy): Response
     {
         return Inertia::render('CaseStudy/Show', [
-            'caseStudy' => $caseStudy,
+            'caseStudy' => $caseStudy->load(['files:id,original_name,case_study_id']),
         ]);
     }
 
@@ -82,5 +85,58 @@ class CaseStudyController extends Controller
     public function destroy(CaseStudy $caseStudy)
     {
         //
+    }
+
+    /**
+     * Create a new file for the case study.
+     */
+    public function createFile(CaseStudy $caseStudy): Response
+    {
+        return Inertia::render('CaseStudy/Forms/UploadFile', [
+            'caseStudyId' => $caseStudy->id,
+        ]);
+    }
+
+    /**
+     * Store a new file for the case study.
+     */
+    public function storeFile(CaseStudyFileRequest $request, CaseStudy $caseStudy): RedirectResponse
+    {
+        $request->validated();
+        $file = $request->file('file');
+        $path = $file->store('case_studies', 'local');
+
+        $caseStudy->files()->create([
+            'name' => pathinfo($file->hashName(), PATHINFO_FILENAME),
+            'original_name' => $file->getClientOriginalName(),
+            'mime_type' => $file->getMimeType(),
+            'size' => $file->getSize(),
+            'path' => $path,
+        ]);
+
+        return redirect()->route('case-studies.show', $caseStudy);
+    }
+
+    /**
+     * Download the specified file.
+     */
+    public function downloadFile(CaseStudy $caseStudy, File $file): \Symfony\Component\HttpFoundation\StreamedResponse
+    {
+        if (!Storage::disk('local')->exists($file->path)) {
+            abort(404, 'File not found.');
+        }
+
+        return Storage::disk('local')->download($file->path, $file->original_name);
+    }
+
+    /**
+     * Remove the specified file from storage.
+     */
+    public function destroyFile(CaseStudy $caseStudy, File $file): RedirectResponse
+    {
+        Storage::disk('local')->delete($file->path);
+        $file->delete();
+
+        return redirect()->route('case-studies.show', $caseStudy);
     }
 }
