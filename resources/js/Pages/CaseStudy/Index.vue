@@ -26,7 +26,6 @@ const form = reactive({
 watch(form,debounce(() => {
     router.get('/case-studies', {search: form.search}, { preserveState:true , replace:true });
 },500));
-
 </script>
 
 <template>
@@ -53,7 +52,7 @@ watch(form,debounce(() => {
                             </div>
                         </div>
                         <div class="w-full md:w-auto flex flex-col md:flex-row space-y-2 md:space-y-0 items-stretch md:items-center justify-end md:space-x-3 flex-shrink-0">
-                            <PrimaryButton @click="() => router.get(route('case-studies.create'), {}, { preserveState:true , replace:true })">
+                            <PrimaryButton @click="router.get(route('case-studies.create'));">
                                 Create Case Study
                             </PrimaryButton>
                             <PrimaryButton>other button</PrimaryButton>

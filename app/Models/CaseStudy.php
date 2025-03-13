@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class CaseStudy extends Model
 {
@@ -27,5 +28,10 @@ class CaseStudy extends Model
                     ->orWhere('followers','like','%'.$search.'%')
                 );
         });
+    }
+
+    public function files(): HasMany
+    {
+        return $this->hasMany(File::class);
     }
 }

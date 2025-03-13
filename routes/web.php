@@ -21,6 +21,11 @@ Route::get('/dashboard', function () {
 
 Route::middleware(['auth', 'verified'])->group(function() {
     Route::resource('case-studies', CaseStudyController::class);
+    Route::get('case-studies/{caseStudy}/file', [CaseStudyController::class, 'createFile'])->name('case-studies.createFile');
+    Route::get('case-studies/{caseStudy}/file/{file}/download', [CaseStudyController::class, 'downloadFile'])->name('case-studies.downloadFile');
+    Route::post('case-studies/{caseStudy}/file', [CaseStudyController::class, 'storeFile'])->name('case-studies.storeFile');
+
+    Route::delete('case-studies/{caseStudy}/file/{file}', [CaseStudyController::class, 'destroyFile'])->name('case-studies.destroyFile');
 });
 
 Route::middleware('auth')->group(function () {
