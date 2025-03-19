@@ -13,6 +13,24 @@ class User extends Authenticatable
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasRoles, HasFactory, Notifiable;
 
+    public function scopeFilter($query, array $filters)
+    {
+        if (!empty($filters['search'])) {
+            $query->where(function ($q) use ($filters) {
+                $q->where('name', 'like', '%' . $filters['search'] . '%')
+                    ->orWhere('email', 'like', '%' . $filters['search'] . '%');
+            });
+        }
+
+        if (!empty($filters['trashed'])) {
+            if ($filters['trashed'] === 'with') {
+                $query->withTrashed();
+            } elseif ($filters['trashed'] === 'only') {
+                $query->onlyTrashed();
+            }
+        }
+    }
+
     /**
      * The attributes that are mass assignable.
      *

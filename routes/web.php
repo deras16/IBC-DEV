@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CaseStudy\CaseStudyController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -24,8 +25,11 @@ Route::middleware(['auth', 'verified'])->group(function() {
     Route::get('case-studies/{caseStudy}/file', [CaseStudyController::class, 'createFile'])->name('case-studies.createFile');
     Route::get('case-studies/{caseStudy}/file/{file}/download', [CaseStudyController::class, 'downloadFile'])->name('case-studies.downloadFile');
     Route::post('case-studies/{caseStudy}/file', [CaseStudyController::class, 'storeFile'])->name('case-studies.storeFile');
-
+                    
     Route::delete('case-studies/{caseStudy}/file/{file}', [CaseStudyController::class, 'destroyFile'])->name('case-studies.destroyFile');
+
+    Route::resource('users', UserController::class);
+    Route::patch('/users/{user}/restore', [UserController::class, 'restore'])->name('users.restore');
 });
 
 Route::middleware('auth')->group(function () {
