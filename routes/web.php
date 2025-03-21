@@ -7,11 +7,11 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::middleware(['auth'])->group(function () {
+    Route::get('/dashboard', function () {
+        return Inertia::render('Dashboard');
+    })->name('dashboard');
 
-Route::middleware('auth')->group(function () {
     Route::resource('case-studies', CaseStudyController::class);
     Route::get('case-studies/{caseStudy}/file', [CaseStudyController::class, 'createFile'])->name('case-studies.createFile');
     Route::get('case-studies/{caseStudy}/file/{file}/download', [CaseStudyController::class, 'downloadFile'])->name('case-studies.downloadFile');
