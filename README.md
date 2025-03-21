@@ -9,11 +9,11 @@ Also install node.js [Official Documentation](https://nodejs.org/en/download)
 
 Clone the repository
 
-    git clone https://github.com/miguelgarias/ibc-group-platform.git
+    git clone https://github.com/FFUENTES2604/IBC.git
 
 Switch to the repo folder
 
-    cd ibc-group-platform
+    cd IBC
 
 Install all the dependencies using composer
 

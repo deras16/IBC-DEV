@@ -17,7 +17,6 @@ const form = useForm({
     id: props.user?.id ?? '',
     name: props.user?.name ?? '',
     email: props.user?.email ?? '',
-    password: '',
 });
 
 const store = () => {
@@ -65,19 +64,6 @@ const update = (id) => {
                                         required
                                     />
                                     <InputError class="mt-2" :message="form.errors.email" />
-                                </div>
-
-                                <div class="sm:col-span-2">
-                                    <InputLabel for="password" value="Password" />
-                                    <TextInput
-                                        id="password"
-                                        type="password"
-                                        class="mt-1 block w-full"
-                                        v-model="form.password"
-                                        :required="!props.user"
-                                        placeholder="Leave blank to keep current password"
-                                    />
-                                    <InputError class="mt-2" :message="form.errors.password" />
                                 </div>
                             </div>
 

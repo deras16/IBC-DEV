@@ -7,10 +7,10 @@ use App\Enums\SpaceType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CaseStudy\CaseStudyFileRequest;
 use App\Http\Requests\CaseStudy\CaseStudyRequest;
+use App\Http\Requests\FileRequest;
 use App\Models\CaseStudy;
 use App\Models\File;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -45,7 +45,10 @@ class CaseStudyController extends Controller
     public function store(CaseStudyRequest $request): RedirectResponse
     {
         CaseStudy::create($request->validated());
-        return redirect()->route('case-studies.index');
+        return redirect()->route('case-studies.index')->with([
+            'type' => 'success',
+            'message' => 'Case study created successfully.'
+        ]);
     }
 
     /**
@@ -76,7 +79,10 @@ class CaseStudyController extends Controller
     public function update(CaseStudyRequest $request, CaseStudy $caseStudy): RedirectResponse
     {
         $caseStudy->update($request->validated());
-        return redirect()->route('case-studies.index');
+        return redirect()->route('case-studies.index')->with([
+            'type' => 'success',
+            'message' => 'Case study updated successfully.'
+        ]);
     }
 
     /**
@@ -100,7 +106,7 @@ class CaseStudyController extends Controller
     /**
      * Store a new file for the case study.
      */
-    public function storeFile(CaseStudyFileRequest $request, CaseStudy $caseStudy): RedirectResponse
+    public function storeFile(FileRequest $request, CaseStudy $caseStudy): RedirectResponse
     {
         $request->validated();
         $file = $request->file('file');
@@ -114,18 +120,23 @@ class CaseStudyController extends Controller
             'path' => $path,
         ]);
 
-        return redirect()->route('case-studies.show', $caseStudy);
+        return redirect()->route('case-studies.show', $caseStudy)->with([
+            'type' => 'success',
+            'message' => 'File uploaded successfully.'
+        ]);
     }
 
     /**
      * Download the specified file.
      */
-    public function downloadFile(CaseStudy $caseStudy, File $file): \Symfony\Component\HttpFoundation\StreamedResponse
+    public function downloadFile(CaseStudy $caseStudy, File $file)
     {
         if (!Storage::disk('local')->exists($file->path)) {
-            abort(404, 'File not found.');
+            return redirect()->route('case-studies.show', $caseStudy)->with([
+                'type' => 'error',
+                'message' => 'File not found.'
+            ]);
         }
-
         return Storage::disk('local')->download($file->path, $file->original_name);
     }
 
@@ -137,6 +148,9 @@ class CaseStudyController extends Controller
         Storage::disk('local')->delete($file->path);
         $file->delete();
 
-        return redirect()->route('case-studies.show', $caseStudy);
+        return redirect()->route('case-studies.show', $caseStudy)->with([
+            'type' => 'success',
+            'message' => 'File deleted successfully.'
+        ]);
     }
 }

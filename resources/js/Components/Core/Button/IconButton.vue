@@ -34,7 +34,7 @@ const { size, squared, pill, href, srText} = props
 const { disabled } = toRefs(props)
 
 const baseClasses = [
-    'inline-flex items-center transition-colors font-medium select-none disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none ',
+    'inline-flex items-center transition-colors font-medium select-none disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none',
 ]
 
 const classes = computed(() => [

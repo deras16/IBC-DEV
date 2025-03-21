@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class File extends Model
 {
+    /** @use HasFactory<\Database\Factories\CaseStudyFactory> */
     use HasFactory;
     protected $guarded = ['id'];
 

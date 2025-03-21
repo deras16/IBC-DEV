@@ -1,7 +1,7 @@
 <script setup>
 import { Head } from '@inertiajs/vue3'
 import NavBar from "@/Components/Core/Nav/NavBar.vue"
-
+import FlashNotification from "@/Components/Core/FlashNotification.vue";
 defineProps({
     title: String,
     default: "Not Defined"
@@ -28,6 +28,7 @@ defineProps({
             <!-- Page Content -->
             <main>
                 <slot />
+                <FlashNotification />
             </main>
         </div>
     </div>
