@@ -1,15 +1,15 @@
 <script setup>
-import { reactive, watch } from "vue";
-import { debounce } from "lodash";
-import { Link, router } from "@inertiajs/vue3";
-import { ShowIcon } from "@/Components/Core/Icons/BaseIcons.jsx";
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
+import {reactive, watch} from "vue";
+import {debounce} from "lodash";
+import {Link, router} from "@inertiajs/vue3";
 import PrimaryButton from "@/Components/Core/Button/PrimaryButton.vue";
-import Pagination from "@/Components/Core/Table/Pagination.vue";
 import DataTable from "@/Components/Core/Table/DataTable.vue";
+import Pagination from "@/Components/Core/Table/Pagination.vue";
+import {ShowIcon} from "@/Components/Core/Icons/BaseIcons.jsx";
+import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 
 const props = defineProps({
-    users: {
+    roles: {
         type: Object,
         required: true
     },
@@ -24,14 +24,14 @@ const form = reactive({
 });
 
 watch(form, debounce(() => {
-    router.get('/users', { search: form.search }, { preserveState: true, replace: true });
+    router.get('/roles', { search: form.search }, { preserveState: true, replace: true });
 }, 500));
 </script>
 
 <template>
-    <AuthenticatedLayout title="Users">
+    <AuthenticatedLayout title="Roles">
         <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">Users</h2>
+            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">Roles</h2>
         </template>
 
         <div class="py-12">
@@ -52,37 +52,37 @@ watch(form, debounce(() => {
                             </div>
                         </div>
                         <div class="w-full md:w-auto flex items-center justify-end">
-                            <PrimaryButton @click="router.get(route('users.create'))">
-                                Create User
+                            <PrimaryButton @click="router.get(route('roles.create'))">
+                                Create Role
                             </PrimaryButton>
                         </div>
                     </div>
 
                     <DataTable
                         :columns="[
+                            { key: 'id', label: 'ID' },
                             { key: 'name', label: 'Name' },
-                            { key: 'email', label: 'Email' },
-                            { key: 'role', label: 'Role' },
                             { key: 'created_at', label: 'Created At' },
                             { key: 'updated_at', label: 'Updated At' }
                         ]"
-                        :data="props.users.data"
+                        :data="props.roles.data"
                     >
                         <template #actions="{ row }">
-                            <Link :href="route('users.show', row.id)">
+                            <Link :href="route('roles.show', row.id)">
                                 <ShowIcon class="block w-6 h-6" />
                             </Link>
                         </template>
                     </DataTable>
 
                     <Pagination
-                        :links="props.users.links"
-                        :currentPage="props.users.current_page"
-                        :totalItems="props.users.total"
-                        :itemsPerPage="props.users.per_page"
+                        :links="props.roles.links"
+                        :currentPage="props.roles.current_page"
+                        :totalItems="props.roles.total"
+                        :itemsPerPage="props.roles.per_page"
                     />
                 </div>
             </div>
         </div>
     </AuthenticatedLayout>
 </template>
+

@@ -27,6 +27,8 @@ class UserRequest extends FormRequest
         return [
             'name' => ['required','string','min:3','max:50'],
             'email' => ['required','email', Rule::unique('users','email')->ignore($this->user?->id)],
+            'roles_id' => ['required','array'],
+            'roles_id.*' => ['numeric','gt:0','exists:roles,id'],
         ];
     }
 
@@ -35,5 +37,10 @@ class UserRequest extends FormRequest
         $attr = $this->validated();
         $attr['password'] = Hash::make(Str::random(8));
         return $attr;
+    }
+
+    public function validatedRolesIds(): array
+    {
+        return $this->only('roles_id')['roles_id'];
     }
 }
