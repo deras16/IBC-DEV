@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CaseStudy\CaseStudyController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\User\RoleController;
 use App\Http\Controllers\User\UserController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -19,6 +20,7 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('case-studies/{caseStudy}/file/{file}', [CaseStudyController::class, 'destroyFile'])->name('case-studies.destroyFile');
 
     Route::resource('users', UserController::class);
+    Route::resource('roles', RoleController::class);
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

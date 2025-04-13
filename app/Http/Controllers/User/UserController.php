@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
+use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
@@ -22,8 +23,17 @@ class UserController extends Controller
     {
         return Inertia::render('User/Index', [
             'users' => User::select('*')
+                ->with(['roles:name'])
                 ->filter(request(['search']))
-                ->paginate(5)
+                ->paginate(8)
+                ->through(fn ($user) => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'created_at' => $user->created_at,
+                    'updated_at' => $user->updated_at,
+                    'role' => $user->roles->first()?->name ?? 'No Role Assigned'
+                ])
                 ->withQueryString(),
             'filters' => request()->only(['search']),
         ]);
@@ -32,9 +42,11 @@ class UserController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(): Response
     {
-        return Inertia::render('User/Forms/CreateEdit');
+        return Inertia::render('User/Forms/CreateEdit', [
+            'roles' => Role::where('name', '!=', 'SUPER-ADMIN')->get(['id', 'name']),
+        ]);
     }
 
     /**
@@ -43,6 +55,9 @@ class UserController extends Controller
     public function store(UserRequest $request):  RedirectResponse
     {
         $user = User::create($request->validatedUserCreate());
+
+        $roles = Role::whereIn('id', $request->validatedRolesIds())->get();
+        $user->syncRoles($roles);
 
         $user->notify(new TempPasswordNotification());
 
@@ -58,7 +73,7 @@ class UserController extends Controller
     public function show(User $user): Response
     {
         return Inertia::render('User/Show', [
-            'user' => $user
+            'user' => $user->load('roles:id,name', 'roles.permissions:id,name')
         ]);
     }
 
@@ -68,7 +83,9 @@ class UserController extends Controller
     public function edit(User $user): Response
     {
         return Inertia::render('User/Forms/CreateEdit', [
-            'user' => $user
+            'user' => $user,
+            'user_roles' => $user->roles->pluck('id')->toArray(),
+            'roles' => Role::where('name', '!=', 'SUPER-ADMIN')->get(['id', 'name']),
         ]);
     }
 
