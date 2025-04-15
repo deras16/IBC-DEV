@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CaseStudy\CaseStudyController;
+use App\Http\Controllers\CaseStudy\Marketing\MarketingCaseController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\User\RoleController;
 use App\Http\Controllers\User\UserController;
@@ -14,10 +15,11 @@ Route::middleware(['auth'])->group(function () {
     })->name('dashboard');
 
     Route::resource('case-studies', CaseStudyController::class);
-    Route::get('case-studies/{caseStudy}/file', [CaseStudyController::class, 'createFile'])->name('case-studies.createFile');
-    Route::get('case-studies/{caseStudy}/file/{file}/download', [CaseStudyController::class, 'downloadFile'])->name('case-studies.downloadFile');
-    Route::post('case-studies/{caseStudy}/file', [CaseStudyController::class, 'storeFile'])->name('case-studies.storeFile');
-    Route::delete('case-studies/{caseStudy}/file/{file}', [CaseStudyController::class, 'destroyFile'])->name('case-studies.destroyFile');
+    Route::resource('marketing-case-studies', MarketingCaseController::class);
+    Route::get('marketing-case-studies/{marketing_case_study}/file', [MarketingCaseController::class, 'createFile'])->name('marketing-case-studies.createFile');
+    Route::get('marketing-case-studies/{marketing_case_study}/file/{file}/download', [MarketingCaseController::class, 'downloadFile'])->name('marketing-case-studies.downloadFile');
+    Route::post('marketing-case-studies/{marketing_case_study}/file', [MarketingCaseController::class, 'storeFile'])->name('marketing-case-studies.storeFile');
+    Route::delete('marketing-case-studies/{marketing_case_study}/file/{file}', [MarketingCaseController::class, 'destroyFile'])->name('marketing-case-studies.destroyFile');
 
     Route::resource('users', UserController::class);
     Route::resource('roles', RoleController::class);

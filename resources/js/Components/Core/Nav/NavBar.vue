@@ -56,6 +56,12 @@ const showingNavigationDropdown = ref(false);
                         >
                             Case Studies
                         </NavLink>
+                        <NavLink
+                            :href="route('marketing-case-studies.index')"
+                            :active="route().current('marketing-case-studies.index')"
+                        >
+                            Marketing Case Studies
+                        </NavLink>
                     </div>
                 </div>
 
@@ -183,6 +189,12 @@ const showingNavigationDropdown = ref(false);
                     :active="route().current('case-studies.index')"
                 >
                     Case Studies
+                </ResponsiveNavLink>
+                <ResponsiveNavLink
+                    :href="route('marketing-case-studies.index')"
+                    :active="route().current('marketing-case-studies.index')"
+                >
+                    Marketing Case Studies
                 </ResponsiveNavLink>
             </div>
 

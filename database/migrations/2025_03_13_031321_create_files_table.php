@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('mime_type');
             $table->string('size');
             $table->string('path');
-            $table->foreignIdFor(\App\Models\CaseStudy::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(\App\Models\MarketingCaseStudy::class)->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
     }
