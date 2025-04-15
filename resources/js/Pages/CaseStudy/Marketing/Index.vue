@@ -2,14 +2,12 @@
 import {reactive, watch} from "vue";
 import {debounce} from "lodash";
 import {Link, router} from "@inertiajs/vue3";
-import { ShowIcon} from "@/Components/Core/Icons/BaseIcons.jsx";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import PrimaryButton from "@/Components/Core/Button/PrimaryButton.vue";
 import Pagination from "@/Components/Core/Table/Pagination.vue";
-import DataTable from "@/Components/Core/Table/DataTable.vue";
 
 const props = defineProps({
-    caseStudies:{
+    marketingCaseStudies:{
         type: Object,
         required:true
     },
@@ -24,19 +22,19 @@ const form = reactive({
 });
 
 watch(form,debounce(() => {
-    router.get('/case-studies', {search: form.search}, { preserveState:true , replace:true });
+    router.get('/marketing-case-studies', {search: form.search}, { preserveState:true , replace:true });
 },500));
 </script>
 
 <template>
-    <AuthenticatedLayout title="Case Studies">
+    <AuthenticatedLayout title="Marketing Case Studies">
         <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">Case Studies</h2>
+            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">Marketing Case Studies</h2>
         </template>
 
         <div class="py-12">
-            <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                <div class="bg-white dark:bg-gray-800 relative shadow-md sm:rounded-lg overflow-hidden">
+            <div>
+                <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
                     <div class="flex flex-col md:flex-row items-center justify-between space-y-3 md:space-y-0 md:space-x-4 p-4">
                         <div class="w-full md:w-1/2">
                             <div class="flex items-center">
@@ -52,42 +50,40 @@ watch(form,debounce(() => {
                             </div>
                         </div>
                         <div class="w-full md:w-auto flex flex-col md:flex-row space-y-2 md:space-y-0 items-stretch md:items-center justify-end md:space-x-3 flex-shrink-0">
-                            <PrimaryButton @click="router.get(route('case-studies.create'));">
-                                Create Case Study
+                            <PrimaryButton @click="router.get(route('marketing-case-studies.create'));">
+                                Create Marketing Case Study
                             </PrimaryButton>
                         </div>
                     </div>
-
-                    <DataTable
-                        :columns="[
-                            {key:'client_name', label:'Client Name'},
-                            {key:'space_topic', label:'Space Topic'},
-                            {key:'space_type', label:'Space Type'},
-                            {key:'space_title', label:'Space Title'},
-                            {key:'date', label:'Date'},
-                            {key:'views', label:'Views'},
-                            {key:'impressions', label:'Impressions'},
-                            {key:'listeners', label:'Listeners'},
-                            {key:'followers', label:'Followers'},
-                        ]"
-                        :data=props.caseStudies.data
-                    >
-                        <template #actions="{row}">
-                            <Link :href="route('case-studies.show', row.id)">
-                                <ShowIcon class="block w-6 h-6" />
-                            </Link>
-                        </template>
-                    </DataTable>
-
-                    <Pagination
-                        :links="props.caseStudies.links"
-                        :currentPage="props.caseStudies.current_page"
-                        :totalItems="props.caseStudies.total"
-                        :itemsPerPage="props.caseStudies.per_page"
-                    />
+                </div>
+            </div>
+            <div v-if="props.marketingCaseStudies.data.length !== 0 " class="mx-auto max-w-7xl sm:px-6 lg:px-8">
+                <div class="flex flex-wrap justify-between gap-4 my-12">
+                    <div v-for="marketingCaseStudy in props.marketingCaseStudies.data" class="text-base p-2">
+                        <Link :preserve-scroll="false"
+                              method="get" as="button" :href="route('marketing-case-studies.show',marketingCaseStudy.id)" class="block max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700 dark:text-white">
+                            <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{{marketingCaseStudy.client_name }}</h5>
+                            <p class="font-normal text-gray-700 dark:text-gray-400">{{marketingCaseStudy.marketing_case_topic}}</p>
+                            <span class="font-semibold">Views:</span> {{ marketingCaseStudy.views }} <br>
+                            <span class="font-semibold ">Impressions:</span> {{ marketingCaseStudy.impressions }} <br>
+                            <span class="font-semibold">Followers:</span> {{ marketingCaseStudy.followers }}
+                        </Link>
+                    </div>
+                </div>
+                <Pagination
+                    :links="props.marketingCaseStudies.links"
+                    :currentPage="props.marketingCaseStudies.current_page"
+                    :totalItems="props.marketingCaseStudies.total"
+                    :itemsPerPage="props.marketingCaseStudies.per_page"
+                />
+            </div>
+            <div v-else>
+                <div class="max-w-7xl mx-auto text-center my-4 text-gray-900 dark:text-gray-100">
+                    <h2 class="text-3xl font-semibold">No data found.</h2>
                 </div>
             </div>
         </div>
+
     </AuthenticatedLayout>
 </template>
 

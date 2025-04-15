@@ -5,7 +5,6 @@ namespace App\Http\Controllers\CaseStudy;
 use App\Enums\SpaceTopic;
 use App\Enums\SpaceType;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\CaseStudy\CaseStudyFileRequest;
 use App\Http\Requests\CaseStudy\CaseStudyRequest;
 use App\Http\Requests\FileRequest;
 use App\Models\CaseStudy;
@@ -57,7 +56,7 @@ class CaseStudyController extends Controller
     public function show(CaseStudy $caseStudy): Response
     {
         return Inertia::render('CaseStudy/Show', [
-            'caseStudy' => $caseStudy->load(['files:id,original_name,case_study_id']),
+            'caseStudy' => $caseStudy,
         ]);
     }
 

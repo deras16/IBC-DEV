@@ -6,7 +6,7 @@ import PrimaryButton from "@/Components/Core/Button/PrimaryButton.vue";
 import InputError from "@/Components/Core/Form/InputError.vue";
 
 const props = defineProps({
-    caseStudyId: {
+    marketingCaseStudyId: {
         type: Number,
         required: true
     }
@@ -58,7 +58,7 @@ const handleFileUpload = (event) => {
     }
 };
 const storeFile = () => {
-    form.post(route('case-studies.storeFile', props.caseStudyId));
+    form.post(route('marketing-case-studies.storeFile', props.marketingCaseStudyId));
 };
 </script>
 
