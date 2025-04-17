@@ -7,6 +7,7 @@ import DropdownLink from "@/Components/Core/Nav/DropdownLink.vue";
 import ResponsiveNavLink from "@/Components/Core/Nav/ResponsiveNavLink.vue";
 import ApplicationLogo from "@/Components/Core/ApplicationLogo.vue";
 import ToggleDark from "@/Components/Core/ToggleDark.vue";
+import { usePermissions } from '@/composables/usePermissions';
 
 const showingNavigationDropdown = ref(false);
 </script>
@@ -39,12 +40,14 @@ const showingNavigationDropdown = ref(false);
                             Dashboard
                         </NavLink>
                         <NavLink
+                            v-if="usePermissions().hasPermission('view users')"
                             :href="route('users.index')"
                             :active="route().current('users.index')"
                         >
                             Users
                         </NavLink>
                         <NavLink
+                            v-if="usePermissions().hasPermission('view roles')"
                             :href="route('roles.index')"
                             :active="route().current('roles.index')"
                         >
@@ -57,6 +60,7 @@ const showingNavigationDropdown = ref(false);
                             Case Studies
                         </NavLink>
                         <NavLink
+                            v-if="usePermissions().hasPermission('view marketing case studies')"
                             :href="route('marketing-case-studies.index')"
                             :active="route().current('marketing-case-studies.index')"
                         >
@@ -173,12 +177,14 @@ const showingNavigationDropdown = ref(false);
                     Dashboard
                 </ResponsiveNavLink>
                 <ResponsiveNavLink
+                    v-if="usePermissions().hasPermission('view users')"
                     :href="route('users.index')"
                     :active="route().current('users.index')"
                 >
                     Users
                 </ResponsiveNavLink>
                 <ResponsiveNavLink
+                    v-if="usePermissions().hasPermission('view roles')"
                     :href="route('roles.index')"
                     :active="route().current('roles.index')"
                 >
@@ -191,6 +197,7 @@ const showingNavigationDropdown = ref(false);
                     Case Studies
                 </ResponsiveNavLink>
                 <ResponsiveNavLink
+                    v-if="usePermissions().hasPermission('view marketing case studies')"
                     :href="route('marketing-case-studies.index')"
                     :active="route().current('marketing-case-studies.index')"
                 >

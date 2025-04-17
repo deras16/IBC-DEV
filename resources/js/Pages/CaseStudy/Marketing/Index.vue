@@ -5,6 +5,7 @@ import {Link, router} from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import PrimaryButton from "@/Components/Core/Button/PrimaryButton.vue";
 import Pagination from "@/Components/Core/Table/Pagination.vue";
+import {usePermissions} from "@/Composables/usePermissions.js";
 
 const props = defineProps({
     marketingCaseStudies:{
@@ -50,7 +51,7 @@ watch(form,debounce(() => {
                             </div>
                         </div>
                         <div class="w-full md:w-auto flex flex-col md:flex-row space-y-2 md:space-y-0 items-stretch md:items-center justify-end md:space-x-3 flex-shrink-0">
-                            <PrimaryButton @click="router.get(route('marketing-case-studies.create'));">
+                            <PrimaryButton v-if="usePermissions().hasPermission('create marketing case studies')" @click="router.get(route('marketing-case-studies.create'));">
                                 Create Marketing Case Study
                             </PrimaryButton>
                         </div>

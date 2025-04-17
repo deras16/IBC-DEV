@@ -3,6 +3,7 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import DangerButton from "@/Components/Core/Button/DangerButton.vue";
 import PrimaryButton from "@/Components/Core/Button/PrimaryButton.vue";
 import {router} from "@inertiajs/vue3";
+import {usePermissions} from "@/Composables/usePermissions.js";
 
 const props = defineProps({
     role:{
@@ -33,12 +34,12 @@ const props = defineProps({
                         </div>
                         <div class="mx-auto items-center text-center">
                             <div>
-                                <PrimaryButton class="ml-8" @click="router.get(route('roles.edit', role.id))">
+                                <PrimaryButton  v-if="usePermissions().hasPermission('edit users')" class="ml-8" @click="router.get(route('roles.edit', role.id))">
                                     Update
                                 </PrimaryButton>
                             </div>
                             <div>
-                                <DangerButton class="mt-2 ml-8">
+                                <DangerButton  v-if="usePermissions().hasPermission('delete users')" class="mt-2 ml-8">
                                     Delete
                                 </DangerButton>
                             </div>

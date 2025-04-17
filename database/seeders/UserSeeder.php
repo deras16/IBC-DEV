@@ -14,13 +14,17 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        $role = Role::where('name', 'SUPER-ADMIN')->first();
+        $admin = Role::where('name', 'SUPER-ADMIN')->first();
+        $marketing = Role::where('name', 'MARKETING')->first();
 
-        $user = User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        User::factory()->create([
+            'name' => 'Administrator',
+            'email' => 'administrator@example.com',
+        ])->assignRole($admin);
 
-        $user->assignRole($role);
+        User::factory()->create([
+            'name' => 'Test',
+            'email' => 'test@example.com'
+        ])->assignRole($marketing);
     }
 }

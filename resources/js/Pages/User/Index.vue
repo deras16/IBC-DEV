@@ -3,6 +3,7 @@ import { reactive, watch } from "vue";
 import { debounce } from "lodash";
 import { Link, router } from "@inertiajs/vue3";
 import { ShowIcon } from "@/Components/Core/Icons/BaseIcons.jsx";
+import { usePermissions } from '@/composables/usePermissions';
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import PrimaryButton from "@/Components/Core/Button/PrimaryButton.vue";
 import Pagination from "@/Components/Core/Table/Pagination.vue";
@@ -52,7 +53,7 @@ watch(form, debounce(() => {
                             </div>
                         </div>
                         <div class="w-full md:w-auto flex items-center justify-end">
-                            <PrimaryButton @click="router.get(route('users.create'))">
+                            <PrimaryButton v-if="usePermissions().hasPermission('create users')" @click="router.get(route('users.create'))">
                                 Create User
                             </PrimaryButton>
                         </div>

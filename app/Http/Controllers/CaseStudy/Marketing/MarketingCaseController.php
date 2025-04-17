@@ -9,9 +9,11 @@ use App\Http\Requests\FileRequest;
 use App\Models\File;
 use App\Models\MarketingCaseStudy;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
+use Spatie\Permission\Models\Role;
 
 class MarketingCaseController extends Controller
 {
@@ -20,6 +22,7 @@ class MarketingCaseController extends Controller
      */
     public function index(): Response
     {
+        Gate::authorize('viewAny', MarketingCaseStudy::class);
         return Inertia::render('CaseStudy/Marketing/Index', [
             'marketingCaseStudies' => MarketingCaseStudy::select('id', 'client_name', 'views', 'marketing_case_topic', 'impressions', 'followers')
                 ->filter(request(['search']))->paginate(8)->withQueryString(),
@@ -32,6 +35,7 @@ class MarketingCaseController extends Controller
      */
     public function create() : Response
     {
+        Gate::authorize('create', MarketingCaseStudy::class);
         return  Inertia::render('CaseStudy/Marketing/CreateEdit', [
             'marketingTopics' => MarketingTopic::cases()
         ]);
@@ -42,6 +46,7 @@ class MarketingCaseController extends Controller
      */
     public function store(MarketingCaseStudyRequest $request): RedirectResponse
     {
+        Gate::authorize('create', MarketingCaseStudy::class);
         MarketingCaseStudy::create($request->validated());
         return redirect()->route('marketing-case-studies.index')->with([
             'type' => 'success',
@@ -54,6 +59,7 @@ class MarketingCaseController extends Controller
      */
     public function show(MarketingCaseStudy $marketingCaseStudy): Response
     {
+        Gate::authorize('view', $marketingCaseStudy);
         return Inertia::render('CaseStudy/Marketing/Show', [
             'marketingCaseStudy' => $marketingCaseStudy,
             'marketingFiles' => $marketingCaseStudy->files()
@@ -72,6 +78,7 @@ class MarketingCaseController extends Controller
      */
     public function edit(MarketingCaseStudy $marketingCaseStudy) : Response
     {
+        Gate::authorize('update', $marketingCaseStudy);
         return Inertia::render('CaseStudy/Marketing/CreateEdit', [
             'marketingCaseStudy' => $marketingCaseStudy,
             'marketingTopics' => MarketingTopic::cases()
@@ -83,6 +90,7 @@ class MarketingCaseController extends Controller
      */
     public function update(MarketingCaseStudyRequest $request, MarketingCaseStudy $marketingCaseStudy): RedirectResponse
     {
+        Gate::authorize('update', $marketingCaseStudy);
         $marketingCaseStudy->update($request->validated());
         return redirect()->route('marketing-case-studies.index')->with([
             'type' => 'success',
@@ -95,13 +103,14 @@ class MarketingCaseController extends Controller
      */
     public function destroy(MarketingCaseStudy $marketingCaseStudy)
     {
-        //
+        Gate::authorize('delete', $marketingCaseStudy);
     }
     /**
      * Create a new file for the case study.
      */
     public function createFile(MarketingCaseStudy $marketingCaseStudy): Response
     {
+        Gate::authorize('uploadFiles', $marketingCaseStudy);
         return Inertia::render('CaseStudy/Marketing/UploadFile', [
             'marketingCaseStudyId' => $marketingCaseStudy->id,
         ]);
@@ -112,6 +121,7 @@ class MarketingCaseController extends Controller
      */
     public function storeFile(FileRequest $request, MarketingCaseStudy $marketingCaseStudy): RedirectResponse
     {
+        Gate::authorize('uploadFiles', $marketingCaseStudy);
         $request->validated();
         $file = $request->file('file');
         $path = $file->store('marketing_case_studies', 'local');
@@ -135,6 +145,7 @@ class MarketingCaseController extends Controller
      */
     public function downloadFile(MarketingCaseStudy $marketingCaseStudy, File $file)
     {
+        Gate::authorize('downloadFiles', $marketingCaseStudy);
         if (!Storage::disk('local')->exists($file->path)) {
             return redirect()->route('marketing-case-studies.show', $marketingCaseStudy)->with([
                 'type' => 'error',
@@ -149,6 +160,7 @@ class MarketingCaseController extends Controller
      */
     public function destroyFile(MarketingCaseStudy $marketingCaseStudy, File $file): RedirectResponse
     {
+        Gate::authorize('deleteFiles', $marketingCaseStudy);
         Storage::disk('local')->delete($file->path);
         $file->delete();
 

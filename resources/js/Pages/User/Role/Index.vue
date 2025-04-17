@@ -7,6 +7,7 @@ import DataTable from "@/Components/Core/Table/DataTable.vue";
 import Pagination from "@/Components/Core/Table/Pagination.vue";
 import {ShowIcon} from "@/Components/Core/Icons/BaseIcons.jsx";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
+import { usePermissions } from '@/composables/usePermissions';
 
 const props = defineProps({
     roles: {
@@ -52,7 +53,7 @@ watch(form, debounce(() => {
                             </div>
                         </div>
                         <div class="w-full md:w-auto flex items-center justify-end">
-                            <PrimaryButton @click="router.get(route('roles.create'))">
+                            <PrimaryButton v-if="usePermissions().hasPermission('create roles')" @click="router.get(route('roles.create'))">
                                 Create Role
                             </PrimaryButton>
                         </div>
