@@ -3,7 +3,7 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import PrimaryButton from "@/Components/Core/Button/PrimaryButton.vue";
 import { router } from "@inertiajs/vue3";
 import DangerButton from "@/Components/Core/Button/DangerButton.vue";
-
+import { usePermissions } from '@/composables/usePermissions';
 const props = defineProps({
     user: {
         type: Object,
@@ -41,10 +41,12 @@ const props = defineProps({
                         </dl>
 
                         <div class="mt-6 flex items-center justify-end space-x-4">
-                            <PrimaryButton @click="router.get(route('users.edit', user.id))">
+                            <PrimaryButton v-if="usePermissions().hasPermission('edit users')" @click="router.get(route('users.edit', user.id))">
                                 Update User
                             </PrimaryButton>
-                            <DangerButton>Delete User</DangerButton>
+                            <DangerButton v-if="usePermissions().hasPermission('delete users')">
+                                Delete User
+                            </DangerButton>
                         </div>
                     </div>
                 </div>

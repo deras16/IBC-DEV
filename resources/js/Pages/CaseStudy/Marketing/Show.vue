@@ -9,6 +9,7 @@ import {DeleteIcon, DownloadIcon, ShowIcon} from "@/Components/Core/Icons/BaseIc
 import Pagination from "@/Components/Core/Table/Pagination.vue";
 import {reactive, watch} from "vue";
 import {debounce} from "lodash";
+import {usePermissions} from "@/Composables/usePermissions.js";
 
 const props = defineProps({
     marketingCaseStudy:{
@@ -71,12 +72,12 @@ watch(form,debounce(() => {
                         <div class="mx-auto items-center text-center">
                             <div class="sm:pt-20">
                                 <div>
-                                    <PrimaryButton class="ml-8" @click="router.get(route('marketing-case-studies.edit', props.marketingCaseStudy.id))">
+                                    <PrimaryButton v-if="usePermissions().hasPermission('edit marketing case studies')" class="ml-8" @click="router.get(route('marketing-case-studies.edit', props.marketingCaseStudy.id))">
                                         Edit
                                     </PrimaryButton>
                                 </div>
                                 <div>
-                                    <DangerButton class="mt-2 ml-8" @click="" >
+                                    <DangerButton v-if="usePermissions().hasPermission('delete marketing case studies')" class="mt-2 ml-8" @click="" >
                                         Delete
                                     </DangerButton>
                                 </div>
@@ -104,7 +105,7 @@ watch(form,debounce(() => {
                         </div>
                     </div>
                     <div class="w-full md:w-auto flex flex-col md:flex-row space-y-2 md:space-y-0 items-stretch md:items-center justify-end md:space-x-3 flex-shrink-0">
-                        <PrimaryButton @click="router.get(route('marketing-case-studies.createFile',props.marketingCaseStudy.id))">
+                        <PrimaryButton v-if="usePermissions().hasPermission('upload marketing case studies files')" @click="router.get(route('marketing-case-studies.createFile',props.marketingCaseStudy.id))">
                             Add new document
                         </PrimaryButton>
                     </div>
@@ -122,10 +123,11 @@ watch(form,debounce(() => {
                         <div class="flex space-x-2">
                             <a :href="route('marketing-case-studies.downloadFile', {marketing_case_study: props.marketingCaseStudy.id, file: row.id})"
                                class="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-widest text-gray-700 shadow-sm transition duration-150 ease-in-out hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-25 dark:border-gray-500 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:focus:ring-offset-gray-800"
+                               v-if="usePermissions().hasPermission('download marketing case studies files')"
                             >
                                 <DownloadIcon className="w-6 h-6 text-gray-800 dark:text-white" />
                             </a>
-                            <SecondaryButton @click="router.delete(route('marketing-case-studies.destroyFile',{marketing_case_study: props.marketingCaseStudy.id, file: row.id}))">
+                            <SecondaryButton v-if="usePermissions().hasPermission('delete marketing case studies files')" @click="router.delete(route('marketing-case-studies.destroyFile',{marketing_case_study: props.marketingCaseStudy.id, file: row.id}))">
                                 <DeleteIcon class="w-6 h-6 text-gray-800 dark:text-white"/>
                             </SecondaryButton>
                         </div>

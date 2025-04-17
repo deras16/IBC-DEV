@@ -28,10 +28,13 @@ class RolePermissionSeeder extends Seeder
         Permission::create(['name' => 'edit roles']);
         Permission::create(['name' => 'delete roles']);
 
-        Permission::create(['name' => 'view case studies']);
-        Permission::create(['name' => 'create case studies']);
-        Permission::create(['name' => 'edit case studies']);
-        Permission::create(['name' => 'delete case studies']);
+        Permission::create(['name' => 'view marketing case studies']);
+        Permission::create(['name' => 'create marketing case studies']);
+        Permission::create(['name' => 'edit marketing case studies']);
+        Permission::create(['name' => 'upload marketing case studies files']);
+        Permission::create(['name' => 'download marketing case studies files']);
+        Permission::create(['name' => 'delete marketing case studies files']);
+        Permission::create(['name' => 'delete marketing case studies']);
 
         // update cache to know about the newly created permissions (required if using WithoutModelEvents in seeders)
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
@@ -41,7 +44,15 @@ class RolePermissionSeeder extends Seeder
             ->givePermissionTo(Permission::all());
 
         Role::create(['name' => 'MARKETING'])
-            ->givePermissionTo(['view case studies', 'create case studies', 'edit case studies', 'delete case studies']);
+            ->givePermissionTo([
+                'view marketing case studies',
+                'create marketing case studies',
+                'edit marketing case studies',
+                'upload marketing case studies files',
+                'download marketing case studies files',
+                'delete marketing case studies files',
+                'delete marketing case studies',
+            ]);
 
     }
 }

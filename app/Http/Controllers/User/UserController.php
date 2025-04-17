@@ -6,10 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\User\UserRequest;
 use App\Models\User;
 use App\Notifications\TempPasswordNotification;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 use Spatie\Permission\Models\Role;
@@ -21,6 +19,7 @@ class UserController extends Controller
      */
     public function index(): Response
     {
+        Gate::authorize('viewAny', User::class);
         return Inertia::render('User/Index', [
             'users' => User::select('*')
                 ->with(['roles:name'])
@@ -44,7 +43,8 @@ class UserController extends Controller
      */
     public function create(): Response
     {
-        return Inertia::render('User/Forms/CreateEdit', [
+        Gate::authorize('create', User::class);
+        return Inertia::render('User/CreateEdit', [
             'roles' => Role::where('name', '!=', 'SUPER-ADMIN')->get(['id', 'name']),
         ]);
     }
@@ -54,6 +54,7 @@ class UserController extends Controller
      */
     public function store(UserRequest $request):  RedirectResponse
     {
+        Gate::authorize('create', User::class);
         $user = User::create($request->validatedUserCreate());
 
         $roles = Role::whereIn('id', $request->validatedRolesIds())->get();
@@ -72,6 +73,7 @@ class UserController extends Controller
      */
     public function show(User $user): Response
     {
+        Gate::authorize('view', $user);
         return Inertia::render('User/Show', [
             'user' => $user->load('roles:id,name', 'roles.permissions:id,name')
         ]);
@@ -82,7 +84,8 @@ class UserController extends Controller
      */
     public function edit(User $user): Response
     {
-        return Inertia::render('User/Forms/CreateEdit', [
+        Gate::authorize('update', $user);
+        return Inertia::render('User/CreateEdit', [
             'user' => $user,
             'user_roles' => $user->roles->pluck('id')->toArray(),
             'roles' => Role::where('name', '!=', 'SUPER-ADMIN')->get(['id', 'name']),
@@ -94,6 +97,7 @@ class UserController extends Controller
      */
     public function update(UserRequest $request, User $user): RedirectResponse
     {
+        Gate::authorize('update', $user);
         $user->update($request->validated());
 
         return redirect()->route('users.index')->with([
@@ -107,6 +111,6 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
-        //
+        Gate::authorize('delete', $user);
     }
 }

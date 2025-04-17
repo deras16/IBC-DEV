@@ -32,7 +32,7 @@ class CaseStudyController extends Controller
      */
     public function create() : Response
     {
-        return  Inertia::render('CaseStudy/Forms/CreateEdit', [
+        return  Inertia::render('CaseStudy/CreateEdit', [
             'spaceTopics' => SpaceTopic::cases(),
             'spaceTypes' => SpaceType::cases()
         ]);
@@ -65,7 +65,7 @@ class CaseStudyController extends Controller
      */
     public function edit(CaseStudy $caseStudy) : Response
     {
-        return Inertia::render('CaseStudy/Forms/CreateEdit', [
+        return Inertia::render('CaseStudy/CreateEdit', [
             'caseStudy' => $caseStudy,
             'spaceTopics' => SpaceTopic::cases(),
             'spaceTypes' => SpaceType::cases()

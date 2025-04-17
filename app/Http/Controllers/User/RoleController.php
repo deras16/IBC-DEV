@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\User\RoleRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
 use Spatie\Permission\Models\Permission;
@@ -18,6 +19,7 @@ class RoleController extends Controller
      */
     public function index(): Response
     {
+        Gate::authorize('viewAny', Role::class);
         return Inertia::render('User/Role/Index',[
             'roles' => Role::select('id','name','created_at','updated_at')->when(\Illuminate\Support\Facades\Request::input('search') ?? false, function($query , $search){
                 $query->where('name','LIKE',"%{$search}%")
@@ -39,6 +41,7 @@ class RoleController extends Controller
      */
     public function create(): Response
     {
+        Gate::authorize('create', Role::class);
         return Inertia::render('User/Role/CreateEdit',[
             'permissions' => Permission::select('id','name')->orderBy('id')->get(),
         ]);
@@ -49,6 +52,7 @@ class RoleController extends Controller
      */
     public function store(RoleRequest $request):  RedirectResponse
     {
+        Gate::authorize('create', Role::class);
         $permissions = Permission::whereIn('id', $request->validatedPermissionsIds())->get();
         $role = Role::create($request->validatedRole())->syncPermissions($permissions);
 
@@ -63,6 +67,7 @@ class RoleController extends Controller
      */
     public function show(Role $role): Response
     {
+        Gate::authorize('view', $role);
         return Inertia::render('User/Role/Show',[
             'role' => $role->load(['permissions:id,name']),
         ]);
@@ -73,6 +78,7 @@ class RoleController extends Controller
      */
     public function edit(Role $role): Response
     {
+        Gate::authorize('update', $role);
         return Inertia::render('User/Role/CreateEdit',[
             'role' => $role,
             'role_permissions' => $role->permissions->pluck('id')->toArray(),
@@ -85,6 +91,7 @@ class RoleController extends Controller
      */
     public function update(RoleRequest $request, Role $role) : RedirectResponse
     {
+        Gate::authorize('update', $role);
         $permissions = Permission::whereIn('id', $request->validatedPermissionsIds())->get();
         $role->update($request->validatedRole());
         $role->syncPermissions($permissions);
@@ -100,6 +107,6 @@ class RoleController extends Controller
      */
     public function destroy(Request $request, Role $role)
     {
-
+        Gate::authorize('delete', $role);
     }
 }
