@@ -3,7 +3,7 @@ import { reactive, watch } from "vue";
 import { debounce } from "lodash";
 import { Link, router } from "@inertiajs/vue3";
 import { ShowIcon } from "@/Components/Core/Icons/BaseIcons.jsx";
-import { usePermissions } from '@/composables/usePermissions';
+import { usePermissions } from '@/Composables/usePermissions';
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import PrimaryButton from "@/Components/Core/Button/PrimaryButton.vue";
 import Pagination from "@/Components/Core/Table/Pagination.vue";

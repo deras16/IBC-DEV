@@ -9,7 +9,7 @@ import {DeleteIcon, DownloadIcon, ShowIcon} from "@/Components/Core/Icons/BaseIc
 import Pagination from "@/Components/Core/Table/Pagination.vue";
 import {reactive, watch} from "vue";
 import {debounce} from "lodash";
-import {usePermissions} from "@/Composables/usePermissions.js";
+import { usePermissions } from '@/Composables/usePermissions';
 
 const props = defineProps({
     marketingCaseStudy:{

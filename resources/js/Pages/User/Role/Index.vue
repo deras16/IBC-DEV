@@ -7,7 +7,7 @@ import DataTable from "@/Components/Core/Table/DataTable.vue";
 import Pagination from "@/Components/Core/Table/Pagination.vue";
 import {ShowIcon} from "@/Components/Core/Icons/BaseIcons.jsx";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import { usePermissions } from '@/composables/usePermissions';
+import { usePermissions } from '@/Composables/usePermissions';
 
 const props = defineProps({
     roles: {

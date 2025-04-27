@@ -7,7 +7,7 @@ import DropdownLink from "@/Components/Core/Nav/DropdownLink.vue";
 import ResponsiveNavLink from "@/Components/Core/Nav/ResponsiveNavLink.vue";
 import ApplicationLogo from "@/Components/Core/ApplicationLogo.vue";
 import ToggleDark from "@/Components/Core/ToggleDark.vue";
-import { usePermissions } from '@/composables/usePermissions';
+import { usePermissions } from '@/Composables/usePermissions';
 
 const showingNavigationDropdown = ref(false);
 </script>

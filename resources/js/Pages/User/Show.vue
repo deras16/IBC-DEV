@@ -3,7 +3,7 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import PrimaryButton from "@/Components/Core/Button/PrimaryButton.vue";
 import { router } from "@inertiajs/vue3";
 import DangerButton from "@/Components/Core/Button/DangerButton.vue";
-import { usePermissions } from '@/composables/usePermissions';
+import { usePermissions } from '@/Composables/usePermissions';
 const props = defineProps({
     user: {
         type: Object,

@@ -5,7 +5,7 @@ import {Link, router} from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import PrimaryButton from "@/Components/Core/Button/PrimaryButton.vue";
 import Pagination from "@/Components/Core/Table/Pagination.vue";
-import {usePermissions} from "@/Composables/usePermissions.js";
+import { usePermissions } from '@/Composables/usePermissions';
 
 const props = defineProps({
     marketingCaseStudies:{
