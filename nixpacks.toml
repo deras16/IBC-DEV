@@ -1,0 +1,14 @@
+[phases.setup]
+nixPkgs = ['php', 'composer', 'nodejs', 'npm', 'mysql', 'sqlite']
+
+[phases.build]
+cmds = [
+  'composer install --no-dev --optimize-autoloader',
+  'npm install && npm run build'
+]
+
+[phases.start]
+cmds = [
+  'php artisan migrate --force',
+  'php artisan serve --host 0.0.0.0 --port $PORT'
+]
