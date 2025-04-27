@@ -5,11 +5,15 @@ nixPkgs = ['php', 'nodejs', 'sqlite', 'mariadb']
 cmds = [
   'curl -sS https://getcomposer.org/installer | php',
   'php composer.phar install --no-dev --optimize-autoloader',
-  'npm install && npm run build'
+  'npm install',
+  'npm run build',
+  'php artisan config:cache',
+  'php artisan route:cache',
+  'php artisan view:cache'
 ]
 
 [phases.start]
 cmds = [
-  'php artisan migrate --force',
+  'until php artisan migrate --force; do echo "Waiting for database..."; sleep 3; done',
   'php artisan serve --host 0.0.0.0 --port $PORT'
 ]
