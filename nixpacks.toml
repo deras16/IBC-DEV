@@ -1,9 +1,10 @@
 [phases.setup]
-nixPkgs = ['php', 'composer', 'nodejs', 'npm', 'mysql', 'sqlite']
+nixPkgs = ['php', 'nodejs', 'npm', 'mysql', 'sqlite']
 
 [phases.build]
 cmds = [
-  'composer install --no-dev --optimize-autoloader',
+  'curl -sS https://getcomposer.org/installer | php',
+  'php composer.phar install --no-dev --optimize-autoloader',
   'npm install && npm run build'
 ]
 
