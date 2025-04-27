@@ -4,13 +4,14 @@ nixPkgs = ['php', 'nodejs', 'sqlite', 'mariadb']
 [phases.build]
 cmds = [
   'curl -sS https://getcomposer.org/installer | php',
-  'php composer.phar install --no-dev --optimize-autoloader',
+  'mv composer.phar /usr/local/bin/composer',  # Mover Composer a una ubicación estándar
+  'composer install --no-dev --optimize-autoloader',  # Instalar dependencias de Composer
   'npm install && npm run build'
 ]
 
 [phases.start]
 cmds = [
-  'php artisan migrate --force',
-  'php artisan serve --host 0.0.0.0 --port $PORT'
+  'composer install --no-dev --optimize-autoloader',  # Asegurarse de que las dependencias estén instaladas
+  'php artisan migrate --force',  # Ejecutar migraciones
+  'php artisan serve --host 0.0.0.0 --port $PORT'  # Iniciar el servidor
 ]
-
