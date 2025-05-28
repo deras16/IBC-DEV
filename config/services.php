@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'twitter' => [
+        'base_url' => env('TWITTER_BASE_URL', 'https://api.twitter.com/2/'),
+        'bearer_token' => env('TWITTER_BEARER_TOKEN'),
+    ],
+
 ];

@@ -22,10 +22,6 @@ class CaseStudyFactory extends Factory
             'space_type' => $this->faker->randomElement(['SS on M', 'Video on M', 'SS on RT', 'Video on RT']),
             'space_title' => $this->faker->sentence(6),
             'date' => $this->faker->date(),
-            'views' => $this->faker->numberBetween(50000, 500000),
-            'impressions' => $this->faker->numberBetween(100000, 1000000),
-            'listeners' => $this->faker->numberBetween(10000, 500000),
-            'followers' => $this->faker->numberBetween(1000, 100000),
         ];
     }
 }

@@ -7,8 +7,10 @@ use App\Enums\SpaceType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CaseStudy\CaseStudyRequest;
 use App\Http\Requests\FileRequest;
+use App\Http\Services\Twitter\TwitterService;
 use App\Models\CaseStudy;
 use App\Models\File;
+use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
@@ -16,13 +18,14 @@ use Inertia\Response;
 
 class CaseStudyController extends Controller
 {
+    public function __construct(protected TwitterService $twitterService) {}
     /**
      * Display a listing of the resource.
      */
     public function index(): Response
     {
         return Inertia::render('CaseStudy/Index', [
-            'caseStudies' => CaseStudy::select('*')->filter(request(['search']))->paginate(5)->withQueryString(),
+            'caseStudies' => CaseStudy::select('*')->filter(request(['search']))->latest('updated_at')->paginate(5)->withQueryString(),
             'filters' => \Illuminate\Support\Facades\Request::only(['search']),
         ]);
     }
@@ -43,7 +46,22 @@ class CaseStudyController extends Controller
      */
     public function store(CaseStudyRequest $request): RedirectResponse
     {
-        CaseStudy::create($request->validated());
+        $data = $request->validated();
+        $caseStudy = CaseStudy::create($data);
+        if (!empty($data['client_twitter_username'])) {
+            try {
+                $result = $this->twitterService->getUserDataByUsername($data['client_twitter_username']);
+
+                $caseStudy->followerHistory()->create([
+                    'follower_count' => $result->public_metrics->followers_count,
+                    'loaded_at' => now(),
+                ]);
+
+            } catch (\Throwable $e) {
+                logger()->error("Error getting Twitter followers for @{$data['client_twitter_username']}: {$e->getMessage()}");
+            }
+        }
+
         return redirect()->route('case-studies.index')->with([
             'type' => 'success',
             'message' => 'Case study created successfully.'
@@ -56,8 +74,50 @@ class CaseStudyController extends Controller
     public function show(CaseStudy $caseStudy): Response
     {
         return Inertia::render('CaseStudy/Show', [
-            'caseStudy' => $caseStudy,
+            'caseStudy' => $caseStudy->load(['followerHistory']),
         ]);
+    }
+
+    public function loadTwitterData(CaseStudy $caseStudy): RedirectResponse
+    {
+        $today = Carbon::today();
+        $alreadyLoaded = $caseStudy->followerHistory()
+            ->whereDate('loaded_at', $today)
+            ->exists();
+
+        if ($alreadyLoaded) {
+            return redirect()->back()->with([
+                'type' => 'warning',
+                'message' => 'Twitter data for today has already been loaded.',
+            ]);
+        }
+
+        if (empty($caseStudy->client_twitter_username)) {
+            return redirect()->back()->with([
+                'type' => 'error',
+                'message' => 'Twitter username is not set for this case study.',
+            ]);
+        }
+
+        try {
+            $result = $this->twitterService->getUserDataByUsername($caseStudy->client_twitter_username);
+
+            $caseStudy->followerHistory()->create([
+                'follower_count' => $result->public_metrics->followers_count,
+                'loaded_at' => now(),
+            ]);
+
+            return redirect()->back()->with([
+                'type' => 'success',
+                'message' => 'Data loaded successfully.',
+            ]);
+        } catch (\Throwable $e) {
+            logger()->error("Error getting Twitter followers for @{$caseStudy->client_twitter_username}: {$e->getMessage()}");
+            return redirect()->back()->with([
+                'type' => 'error',
+                'message' => 'Error getting Twitter information. Please try again later.',
+            ]);
+        }
     }
 
     /**

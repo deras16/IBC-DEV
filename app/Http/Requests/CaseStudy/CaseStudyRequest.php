@@ -30,10 +30,7 @@ class CaseStudyRequest extends FormRequest
             'space_topic' => ['required', 'string', Rule::enum(SpaceTopic::class)],
             'space_type' => ['required', 'string', Rule::enum(SpaceType::class)],
             'date' => ['required', 'date'],
-            'views' => ['required', 'numeric', 'gt:0'],
-            'impressions' => ['required', 'numeric', 'gt:0'],
-            'listeners' => ['required', 'numeric', 'gt:0'],
-            'followers' => ['required', 'numeric', 'gt:0'],
+            'client_twitter_username' => ['nullable', 'string', 'max:50']
         ];
     }
 }

@@ -6,17 +6,20 @@ use App\Enums\MarketingTopic;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CaseStudy\MarketingCaseStudyRequest;
 use App\Http\Requests\FileRequest;
+use App\Http\Services\Twitter\TwitterService;
+use App\Models\CaseStudy;
 use App\Models\File;
 use App\Models\MarketingCaseStudy;
+use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
-use Spatie\Permission\Models\Role;
 
 class MarketingCaseController extends Controller
 {
+    public function __construct(protected TwitterService $twitterService) {}
     /**
      * Display a listing of the resource.
      */
@@ -24,8 +27,8 @@ class MarketingCaseController extends Controller
     {
         Gate::authorize('viewAny', MarketingCaseStudy::class);
         return Inertia::render('CaseStudy/Marketing/Index', [
-            'marketingCaseStudies' => MarketingCaseStudy::select('id', 'client_name', 'views', 'marketing_case_topic', 'impressions', 'followers')
-                ->filter(request(['search']))->paginate(8)->withQueryString(),
+            'marketingCaseStudies' => MarketingCaseStudy::select('id', 'client_name', 'client_twitter_username')
+                ->filter(request(['search']))->latest('updated_at')->paginate(8)->withQueryString(),
             'filters' => \Illuminate\Support\Facades\Request::only(['search']),
         ]);
     }
@@ -47,7 +50,21 @@ class MarketingCaseController extends Controller
     public function store(MarketingCaseStudyRequest $request): RedirectResponse
     {
         Gate::authorize('create', MarketingCaseStudy::class);
-        MarketingCaseStudy::create($request->validated());
+        $data = $request->validated();
+        $marketingCaseStudy = MarketingCaseStudy::create($data);
+        if (!empty($data['client_twitter_username'])) {
+            try {
+                $result = $this->twitterService->getUserDataByUsername($data['client_twitter_username']);
+
+                $marketingCaseStudy->followerHistory()->create([
+                    'follower_count' => $result->public_metrics->followers_count,
+                    'loaded_at' => now(),
+                ]);
+
+            } catch (\Throwable $e) {
+                logger()->error("Error getting Twitter followers for @{$data['client_twitter_username']}: {$e->getMessage()}");
+            }
+        }
         return redirect()->route('marketing-case-studies.index')->with([
             'type' => 'success',
             'message' => 'Case study created successfully.'
@@ -61,7 +78,7 @@ class MarketingCaseController extends Controller
     {
         Gate::authorize('view', $marketingCaseStudy);
         return Inertia::render('CaseStudy/Marketing/Show', [
-            'marketingCaseStudy' => $marketingCaseStudy,
+            'marketingCaseStudy' => $marketingCaseStudy->load('followerHistory'),
             'marketingFiles' => $marketingCaseStudy->files()
                 ->select('id', 'original_name')
                 ->when(\Illuminate\Support\Facades\Request::input('search') ?? false, function($query , $search) {
@@ -73,6 +90,47 @@ class MarketingCaseController extends Controller
         ]);
     }
 
+    public function loadTwitterData(MarketingCaseStudy $marketingCaseStudy): RedirectResponse
+    {
+        $today = Carbon::today();
+        $alreadyLoaded = $marketingCaseStudy->followerHistory()
+            ->whereDate('loaded_at', $today)
+            ->exists();
+
+        if ($alreadyLoaded) {
+            return redirect()->back()->with([
+                'type' => 'warning',
+                'message' => 'Twitter data for today has already been loaded.',
+            ]);
+        }
+
+        if (empty($marketingCaseStudy->client_twitter_username)) {
+            return redirect()->back()->with([
+                'type' => 'error',
+                'message' => 'Twitter username is not set for this marketing case.',
+            ]);
+        }
+
+        try {
+            $result = $this->twitterService->getUserDataByUsername($marketingCaseStudy->client_twitter_username);
+
+            $marketingCaseStudy->followerHistory()->create([
+                'follower_count' => $result->public_metrics->followers_count,
+                'loaded_at' => now(),
+            ]);
+
+            return redirect()->back()->with([
+                'type' => 'success',
+                'message' => 'Data loaded successfully.',
+            ]);
+        } catch (\Throwable $e) {
+            logger()->error("Error getting Twitter followers for @{$marketingCaseStudy->client_twitter_username}: {$e->getMessage()}");
+            return redirect()->back()->with([
+                'type' => 'error',
+                'message' => 'Error getting Twitter information. Please try again later.',
+            ]);
+        }
+    }
     /**
      * Show the form for editing the specified resource.
      */

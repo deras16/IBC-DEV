@@ -29,10 +29,7 @@ class MarketingCaseStudyRequest extends FormRequest
             'client_description' => ['required', 'string', 'min:5', 'max:100'],
             'marketing_case_topic' => ['required', 'string', Rule::enum(MarketingTopic::class)],
             'date' => ['required', 'date'],
-            'views' => ['required', 'numeric', 'gt:0'],
-            'impressions' => ['required', 'numeric', 'gt:0'],
-            'listeners' => ['required', 'numeric', 'gt:0'],
-            'followers' => ['required', 'numeric', 'gt:0'],
+            'client_twitter_username' => ['nullable', 'string', 'max:50']
         ];
     }
 }

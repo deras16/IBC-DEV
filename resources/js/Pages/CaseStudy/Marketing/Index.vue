@@ -65,9 +65,7 @@ watch(form,debounce(() => {
                               method="get" as="button" :href="route('marketing-case-studies.show',marketingCaseStudy.id)" class="block max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700 dark:text-white">
                             <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{{marketingCaseStudy.client_name }}</h5>
                             <p class="font-normal text-gray-700 dark:text-gray-400">{{marketingCaseStudy.marketing_case_topic}}</p>
-                            <span class="font-semibold">Views:</span> {{ marketingCaseStudy.views }} <br>
-                            <span class="font-semibold ">Impressions:</span> {{ marketingCaseStudy.impressions }} <br>
-                            <span class="font-semibold">Followers:</span> {{ marketingCaseStudy.followers }}
+                            <span class="font-semibold">Twitter User:</span> {{ marketingCaseStudy.client_twitter_username }} <br>
                         </Link>
                     </div>
                 </div>

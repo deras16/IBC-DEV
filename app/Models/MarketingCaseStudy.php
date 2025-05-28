@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class MarketingCaseStudy extends Model
 {
@@ -38,5 +39,10 @@ class MarketingCaseStudy extends Model
     public function files(): HasMany
     {
         return $this->hasMany(File::class);
+    }
+
+    public function followerHistory(): MorphMany
+    {
+        return $this->morphMany(FollowerHistory::class, 'followable');
     }
 }

@@ -65,10 +65,7 @@ watch(form,debounce(() => {
                             {key:'space_type', label:'Space Type'},
                             {key:'space_title', label:'Space Title'},
                             {key:'date', label:'Date'},
-                            {key:'views', label:'Views'},
-                            {key:'impressions', label:'Impressions'},
-                            {key:'listeners', label:'Listeners'},
-                            {key:'followers', label:'Followers'},
+                            {key:'client_twitter_username', label:'Twitter User'}
                         ]"
                         :data=props.caseStudies.data
                     >

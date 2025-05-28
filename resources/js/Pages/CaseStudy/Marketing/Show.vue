@@ -5,11 +5,12 @@ import DangerButton from "@/Components/Core/Button/DangerButton.vue";
 import PrimaryButton from "@/Components/Core/Button/PrimaryButton.vue";
 import SecondaryButton from "@/Components/Core/Button/SecondaryButton.vue";
 import DataTable from "@/Components/Core/Table/DataTable.vue";
-import {DeleteIcon, DownloadIcon, ShowIcon} from "@/Components/Core/Icons/BaseIcons.jsx";
+import {DeleteIcon, DownloadIcon, TwitterIcon} from "@/Components/Core/Icons/BaseIcons.jsx";
 import Pagination from "@/Components/Core/Table/Pagination.vue";
 import {reactive, watch} from "vue";
 import {debounce} from "lodash";
 import { usePermissions } from '@/Composables/usePermissions';
+import ChartCard from "@/Components/Core/Chart/ChartCard.vue";
 
 const props = defineProps({
     marketingCaseStudy:{
@@ -32,6 +33,17 @@ const form = reactive({
 watch(form,debounce(() => {
     router.get(route('marketing-case-studies.show',{id:props.marketingCaseStudy.id}), {search: form.search}, { preserveState:true , replace:true, preserveScroll: true });
 },500));
+
+const history = props.marketingCaseStudy.follower_history || [];
+
+const categories = history.map(item => item.loaded_at);
+
+const series = [
+    {
+        name: "Followers",
+        data: history.map(item => item.follower_count),
+    },
+];
 </script>
 
 <template>
@@ -56,13 +68,7 @@ watch(form,debounce(() => {
                                 <br>
                                 <span class="font-semibold">Date:</span> {{ props.marketingCaseStudy.date }}
                                 <br>
-                                <span class="font-semibold">Views:</span> {{ props.marketingCaseStudy.views }}
-                                <br>
-                                <span class="font-semibold">Impressions:</span> {{ props.marketingCaseStudy.impressions}}
-                                <br>
-                                <span class="font-semibold">Listeners:</span> {{ props.marketingCaseStudy.listeners}}
-                                <br>
-                                <span class="font-semibold">Followers:</span> {{ props.marketingCaseStudy.followers}}
+                                <span class="font-semibold">Client Username:</span> {{ props.marketingCaseStudy.client_twitter_username}}
                                 <br>
                                 <span class="font-semibold">Created at:</span> {{ props.marketingCaseStudy.created_at }}
                                 <br>
@@ -140,6 +146,36 @@ watch(form,debounce(() => {
                     :totalItems="props.marketingFiles.total"
                     :itemsPerPage="props.marketingFiles.per_page"
                 />
+            </div>
+        </div>
+
+        <div class="py-12">
+            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg text-gray-900 dark:text-gray-100 p-4 md:p-6">
+                    <div class="flex justify-between mb-4">
+                        <div class="flex mb-2.5 space-x-3">
+                            <TwitterIcon class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" />
+                            <h5 class="leading-none text-2xl font-bold text-gray-900 dark:text-white pb-2">X (Twitter) Analytics</h5>
+                        </div>
+                        <div class="flex items-center justify-end">
+                            <PrimaryButton @click="router.post(route('marketing-case-studies.loadTwitterData',props.marketingCaseStudy.id))">
+                                load data
+                            </PrimaryButton>
+                        </div>
+                    </div>
+                    <ChartCard
+                        v-if="props.marketingCaseStudy.follower_history.length > 0"
+                        :x-label="'Date'"
+                        :y-label="'Followers'"
+                        :series="series"
+                        :categories="categories"
+                    />
+                    <div v-else>
+                        <div class="max-w-7xl mx-auto text-center my-4 text-gray-900 dark:text-gray-100">
+                            <h2 class="text-2xl font-normal">No data found.</h2>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </AuthenticatedLayout>

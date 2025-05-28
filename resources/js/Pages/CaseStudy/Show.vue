@@ -2,7 +2,10 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import PrimaryButton from "@/Components/Core/Button/PrimaryButton.vue";
 import DangerButton from "@/Components/Core/Button/DangerButton.vue";
+import ChartCard from "@/Components/Core/Chart/ChartCard.vue";
 import {router} from "@inertiajs/vue3";
+import {TwitterIcon} from "@/Components/Core/Icons/BaseIcons.jsx";
+import {usePermissions} from "@/Composables/usePermissions.js";
 
 const props = defineProps({
     caseStudy: {
@@ -10,6 +13,21 @@ const props = defineProps({
         required: true
     }
 });
+
+const history = props.caseStudy.follower_history || [];
+
+const categories = history.map(item => item.loaded_at
+    //new Date(item.loaded_at).toLocaleDateString("es-ES", {
+        //day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit"
+    //})
+);
+
+const series = [
+    {
+        name: "Followers",
+        data: history.map(item => item.follower_count),
+    },
+];
 </script>
 
 <template>
@@ -23,54 +41,71 @@ const props = defineProps({
         </template>
 
         <div class="py-12">
-            <div class="flex flex-wrap mx-auto sm:px-6 lg:px-8">
-                <div class="mx-auto sm:px-6 lg:px-8 max-w-7xl mt-4">
-                    <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg dark:bg-gray-800 text-gray-900 dark:text-gray-100 ">
-                        <div class="py-8 px-4 mx-auto max-w-2xl lg:py-16">
-                            <h2 class="mb-2 text-xl font-semibold leading-none text-gray-900 md:text-2xl dark:text-white">
-                                {{ caseStudy.space_title }}
-                            </h2>
-                            <p class="mb-4 text-lg font-bold text-gray-500 dark:text-gray-400">
-                                {{ caseStudy.client_name }}
-                            </p>
+            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg text-gray-900 dark:text-gray-100">
+                    <div class="flex flex-wrap my-12">
+                        <div class="mx-auto">
+                            <span class="inline text-3xl h-fit"> {{ caseStudy.space_title }}</span>
 
-                            <dl class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <dt class="mb-1 font-semibold text-gray-900 dark:text-white">Space Topic</dt>
-                                    <dd class="text-gray-500 dark:text-gray-400">{{ caseStudy.space_topic }}</dd>
-                                </div>
-                                <div>
-                                    <dt class="mb-1 font-semibold text-gray-900 dark:text-white">Space Type</dt>
-                                    <dd class="text-gray-500 dark:text-gray-400">{{ caseStudy.space_type }}</dd>
-                                </div>
-                                <div>
-                                    <dt class="mb-1 font-semibold text-gray-900 dark:text-white">Date</dt>
-                                    <dd class="text-gray-500 dark:text-gray-400">{{ caseStudy.date }}</dd>
-                                </div>
-                                <div>
-                                    <dt class="mb-1 font-semibold text-gray-900 dark:text-white">Views</dt>
-                                    <dd class="text-gray-500 dark:text-gray-400">{{ caseStudy.views.toLocaleString() }}</dd>
-                                </div>
-                                <div>
-                                    <dt class="mb-1 font-semibold text-gray-900 dark:text-white">Impressions</dt>
-                                    <dd class="text-gray-500 dark:text-gray-400">{{ caseStudy.impressions.toLocaleString() }}</dd>
-                                </div>
-                                <div>
-                                    <dt class="mb-1 font-semibold text-gray-900 dark:text-white">Listeners</dt>
-                                    <dd class="text-gray-500 dark:text-gray-400">{{ caseStudy.listeners.toLocaleString() }}</dd>
-                                </div>
-                                <div>
-                                    <dt class="mb-1 font-semibold text-gray-900 dark:text-white">Followers</dt>
-                                    <dd class="text-gray-500 dark:text-gray-400">{{ caseStudy.followers.toLocaleString() }}</dd>
-                                </div>
-                            </dl>
-
-                            <div class="mt-6 flex items-center justify-end space-x-4">
-                                <PrimaryButton @click="router.get(route('case-studies.edit',props.caseStudy.id))">
-                                    Update Case Study
-                                </PrimaryButton>
-                                <DangerButton>Delete Case Study</DangerButton>
+                            <div class="mt-2 text-lg">
+                                <span class="inline text-lg h-fit">{{ caseStudy.client_name }}</span>
+                                <br>
+                                <span class="font-semibold">Space Topic:</span> {{ caseStudy.space_topic }}
+                                <br>
+                                <span class="font-semibold">Space Type:</span>{{ caseStudy.space_type }}
+                                <br>
+                                <span class="font-semibold">Date:</span> {{ caseStudy.date }}
+                                <br>
+                                <span class="font-semibold">Client Username:</span>{{ caseStudy.client_twitter_username }}
+                                <br>
+                                <span class="font-semibold">Created at:</span> {{ caseStudy.created_at }}
+                                <br>
+                                <span class="font-semibold">Updated at:</span> {{ caseStudy.updated_at }}
                             </div>
+                        </div>
+                        <div class="mx-auto items-center text-center">
+                            <div class="sm:pt-20">
+                                <div>
+                                    <PrimaryButton @click="router.get(route('case-studies.edit',props.caseStudy.id))">
+                                        Update Case Study
+                                    </PrimaryButton>
+                                </div>
+                                <div>
+                                    <DangerButton class="mt-2">
+                                        Delete Case Study
+                                    </DangerButton>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="py-12">
+            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg text-gray-900 dark:text-gray-100 p-4 md:p-6">
+                    <div class="flex justify-between mb-4">
+                        <div class="flex mb-2.5 space-x-3">
+                            <TwitterIcon class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" />
+                            <h5 class="leading-none text-2xl font-bold text-gray-900 dark:text-white pb-2">X (Twitter) Analytics</h5>
+                        </div>
+                        <div class="flex items-center justify-end">
+                            <PrimaryButton @click="router.post(route('case-studies.loadTwitterData',props.caseStudy.id))">
+                                load data
+                            </PrimaryButton>
+                        </div>
+                    </div>
+                    <ChartCard
+                        v-if="props.caseStudy.follower_history.length > 0"
+                        :x-label="'Date'"
+                        :y-label="'Followers'"
+                        :series="series"
+                        :categories="categories"
+                    />
+                    <div v-else>
+                        <div class="max-w-7xl mx-auto text-center my-4 text-gray-900 dark:text-gray-100">
+                            <h2 class="text-2xl font-normal">No data found.</h2>
                         </div>
                     </div>
                 </div>
