@@ -26,10 +26,7 @@ const form = useForm({
     client_description: props.marketingCaseStudy?.client_description ?? '',
     marketing_case_topic : props.marketingCaseStudy?.marketing_case_topic ?? '',
     date: props.marketingCaseStudy?.date ?? '',
-    views: props.marketingCaseStudy?.views ?? '',
-    impressions: props.marketingCaseStudy?.impressions ?? '',
-    listeners: props.marketingCaseStudy?.listeners ?? '',
-    followers: props.marketingCaseStudy?.followers ?? '',
+    client_twitter_username: props.marketingCaseStudy?.client_twitter_username ?? '',
 });
 const store = () => {
     form.post(route('marketing-case-studies.store'));
@@ -106,56 +103,16 @@ const update = (id) => {
                                     <InputError class="mt-2" :message="form.errors.marketing_case_topic" />
                                 </div>
                                 <div class="w-full">
-                                    <InputLabel for="views" value="Views" />
+                                    <InputLabel for="client_twitter_username" value="Client Twitter Username" />
 
                                     <TextInput
-                                        id="views"
-                                        type="number"
+                                        id="client_twitter_username"
+                                        type="text"
                                         class="mt-1 block w-full"
-                                        v-model="form.views"
-                                        required
+                                        v-model="form.client_twitter_username"
                                     />
 
-                                    <InputError class="mt-2" :message="form.errors.views" />
-                                </div>
-                                <div>
-                                    <InputLabel for="impressions" value="Impressions" />
-
-                                    <TextInput
-                                        id="impressions"
-                                        type="number"
-                                        class="mt-1 block w-full"
-                                        v-model="form.impressions"
-                                        required
-                                    />
-
-                                    <InputError class="mt-2" :message="form.errors.impressions" />
-                                </div>
-                                <div class="w-full">
-                                    <InputLabel for="listeners" value="Listeners" />
-
-                                    <TextInput
-                                        id="listeners"
-                                        type="number"
-                                        class="mt-1 block w-full"
-                                        v-model="form.listeners"
-                                        required
-                                    />
-
-                                    <InputError class="mt-2" :message="form.errors.listeners" />
-                                </div>
-                                <div>
-                                    <InputLabel for="followers" value="Followers" />
-
-                                    <TextInput
-                                        id="followers"
-                                        type="number"
-                                        class="mt-1 block w-full"
-                                        v-model="form.followers"
-                                        required
-                                    />
-
-                                    <InputError class="mt-2" :message="form.errors.followers" />
+                                    <InputError class="mt-2" :message="form.errors.client_twitter_username" />
                                 </div>
 
                             </div>

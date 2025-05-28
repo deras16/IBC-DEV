@@ -2,16 +2,25 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class CaseStudy extends Model
 {
     /** @use HasFactory<\Database\Factories\CaseStudyFactory> */
     use HasFactory;
     protected $guarded = ['id'];
-
+    public function getCreatedAtAttribute(): string
+    {
+        return Carbon::parse($this->attributes['created_at'])->diffForHumans();
+    }
+    public function getUpdatedAtAttribute(): string
+    {
+        return Carbon::parse($this->attributes['updated_at'])->diffForHumans();
+    }
     public function scopeFilter($query, array $filters): void
     {
         $query->when($filters['search'] ?? false, function( $query, $search){
@@ -32,5 +41,10 @@ class CaseStudy extends Model
     public function files(): HasMany
     {
         return $this->hasMany(File::class);
+    }
+
+    public function followerHistory(): MorphMany
+    {
+        return $this->morphMany(FollowerHistory::class, 'followable');
     }
 }

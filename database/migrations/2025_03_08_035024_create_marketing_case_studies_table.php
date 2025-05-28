@@ -18,10 +18,7 @@ return new class extends Migration
             $table->text('client_description');
             $table->enum('marketing_case_topic', ['Sports & Life Style', 'Music Streaming', 'Travel & Hospitality', 'Food & Beverage', 'Health & Wellness', 'Fashion & Beauty', 'Technology & Gadgets', 'Entertainment & Media', 'Automotive', 'Finance & Banking']);
             $table->date('date');
-            $table->bigInteger('views');
-            $table->bigInteger('impressions');
-            $table->bigInteger('listeners');
-            $table->bigInteger('followers');
+            $table->string('client_twitter_username')->nullable();
             $table->timestamps();
         });
     }
