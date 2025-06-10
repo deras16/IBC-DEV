@@ -18,11 +18,13 @@ class UserSeeder extends Seeder
         $marketing = Role::where('name', 'MARKETING')->first();
 
         User::factory()->create([
+            'id' => 1,
             'name' => 'Administrator',
             'email' => 'administrator@example.com',
         ])->assignRole($admin);
 
         User::factory()->create([
+            'id' => 2,
             'name' => 'Test',
             'email' => 'test@example.com'
         ])->assignRole($marketing);

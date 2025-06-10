@@ -34,12 +34,12 @@ const props = defineProps({
                         </div>
                         <div class="mx-auto items-center text-center">
                             <div>
-                                <PrimaryButton  v-if="usePermissions().hasPermission('edit users')" class="ml-8" @click="router.get(route('roles.edit', role.id))">
+                                <PrimaryButton v-if="usePermissions().hasPermission('edit users') && props.role.id !== 1" class="ml-8" @click="router.get(route('roles.edit', role.id))">
                                     Update
                                 </PrimaryButton>
                             </div>
                             <div>
-                                <DangerButton  v-if="usePermissions().hasPermission('delete users')" class="mt-2 ml-8">
+                                <DangerButton v-if="usePermissions().hasPermission('delete users') && props.role.id !== 1" class="mt-2 ml-8"  @click="router.delete(route('roles.destroy', role.id))">
                                     Delete
                                 </DangerButton>
                             </div>

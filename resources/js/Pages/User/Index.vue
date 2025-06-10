@@ -21,11 +21,12 @@ const props = defineProps({
 });
 
 const form = reactive({
-    search: props.filters?.search
+    search: props.filters?.search,
+    trashed: props.filters?.trashed
 });
 
 watch(form, debounce(() => {
-    router.get('/users', { search: form.search }, { preserveState: true, replace: true });
+    router.get('/users', { search: form.search , trashed: form.trashed}, { preserveState: true, replace: true });
 }, 500));
 </script>
 
@@ -52,7 +53,21 @@ watch(form, debounce(() => {
                                 </div>
                             </div>
                         </div>
-                        <div class="w-full md:w-auto flex items-center justify-end">
+                        <div class="w-full md:w-auto flex items-center justify-end space-x-3">
+                            <Link
+                                :href="route('users.index')"
+                                method="get" as="button"
+                                class="hover:text-green-500 dark:hover:text-green-600 hover:underline text-gray-600 dark:text-gray-400 text-sm"
+                                preserve-scroll
+                            >
+                                clean search
+                            </Link>
+                            <div class="relative">
+                                <select v-model="form.trashed" id="trashed" class="px-4 py-2 items-center bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-green-500 dark:focus:border-green-500">
+                                    <option value="with">With Deleted</option>
+                                    <option value="only">Only Deleted</option>
+                                </select>
+                            </div>
                             <PrimaryButton v-if="usePermissions().hasPermission('create users')" @click="router.get(route('users.create'))">
                                 Create User
                             </PrimaryButton>

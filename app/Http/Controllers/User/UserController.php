@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\User\UserDeleteRequest;
 use App\Http\Requests\User\UserRequest;
 use App\Models\User;
 use App\Notifications\TempPasswordNotification;
@@ -23,7 +24,7 @@ class UserController extends Controller
         return Inertia::render('User/Index', [
             'users' => User::select('*')
                 ->with(['roles:name'])
-                ->filter(request(['search']))
+                ->filter(request(['search','trashed']))
                 ->paginate(8)
                 ->through(fn ($user) => [
                     'id' => $user->id,
@@ -34,7 +35,7 @@ class UserController extends Controller
                     'role' => $user->roles->first()?->name ?? 'No Role Assigned'
                 ])
                 ->withQueryString(),
-            'filters' => request()->only(['search']),
+            'filters' => request()->only(['search','trashed']),
         ]);
     }
 
@@ -109,8 +110,33 @@ class UserController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(User $user)
+    public function destroy(User $user, UserDeleteRequest $request): RedirectResponse
     {
         Gate::authorize('delete', $user);
+        if($user->id == auth()->user()->id){
+            return redirect()->route('users.index')->with([
+                'type' => 'error',
+                'message' => 'You cannot delete your own account.'
+            ]);
+        }
+
+        $request->validated();
+        $user->delete();
+        return redirect()->route('users.index')->with([
+            'type' => 'success',
+            'message' => 'User soft deleted successfully.'
+        ]);
+    }
+
+
+    public function restore(User $user): RedirectResponse
+    {
+        Gate::authorize('restore', $user);
+        $user->restore();
+
+        return redirect()->route('users.index')->with([
+            'type' => 'success',
+            'message' => 'User restored successfully.'
+        ]);
     }
 }

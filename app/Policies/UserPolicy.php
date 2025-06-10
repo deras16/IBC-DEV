@@ -39,6 +39,9 @@ class UserPolicy
         if($model->id == 1){
             return false;
         }
+        if ($model->trashed()){
+            return false;
+        }
         return $user->hasRole('SUPER-ADMIN') && $user->hasPermissionTo('edit users');
     }
 
@@ -50,6 +53,9 @@ class UserPolicy
         if($model->id == 1){
             return false;
         }
+        if ($model->trashed()){
+            return false;
+        }
         return $user->hasRole('SUPER-ADMIN') && $user->hasPermissionTo('delete users');
     }
 
@@ -58,6 +64,9 @@ class UserPolicy
      */
     public function restore(User $user, User $model): bool
     {
+        if ($model->trashed()){
+            return $user->hasRole('SUPER-ADMIN') && $user->hasPermissionTo('restore users');
+        }
         return false;
     }
 

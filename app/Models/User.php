@@ -6,6 +6,7 @@ namespace App\Models;
 use App\Notifications\ResetPasswordNotification;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
@@ -13,7 +14,7 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasRoles;
+    use HasFactory, Notifiable, HasRoles, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -60,6 +61,11 @@ class User extends Authenticatable
     {
         return Carbon::parse($this->attributes['updated_at'])->diffForHumans();
     }
+    public function getDeletedAtAttribute(): ?string
+    {
+        return $this->attributes['deleted_at'] ? Carbon::parse($this->attributes['deleted_at'])->diffForHumans(): null;
+    }
+
     public function scopeFilter($query, array $filters): void
     {
         $query->when($filters['search'] ?? false, function( $query, $search){
@@ -68,6 +74,18 @@ class User extends Authenticatable
                 ->orWhere('email','like','%'.$search.'%')
                     ->orWhereHas('roles',fn($query) => $query->where('roles.name','like','%'.$search.'%'))
             );
+        })->when($filters['trashed'] ?? null, function ($query, $trashed) {
+            if ($trashed === 'with') {
+                $query->withTrashed();
+            } elseif ($trashed === 'only') {
+                $query->onlyTrashed();
+            }
         });
+    }
+
+    //view soft deleted models
+    public function resolveRouteBinding($value, $field = null)
+    {
+        return $this->where($field ?? 'id', $value)->withTrashed()->firstOrFail();
     }
 }

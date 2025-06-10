@@ -9,7 +9,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'checkUserHasRole'])->group(function () {
     Route::get('/dashboard', function () {
         return Inertia::render('Dashboard');
     })->name('dashboard');
@@ -24,6 +24,7 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('marketing-case-studies/{marketing_case_study}/file/{file}', [MarketingCaseController::class, 'destroyFile'])->name('marketing-case-studies.destroyFile');
 
     Route::resource('users', UserController::class);
+    Route::post('users/{user}/restore', [UserController::class, 'restore'])->name('users.restore');
     Route::resource('roles', RoleController::class);
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

@@ -1,15 +1,37 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import PrimaryButton from "@/Components/Core/Button/PrimaryButton.vue";
-import { router } from "@inertiajs/vue3";
+import {router, useForm} from "@inertiajs/vue3";
 import DangerButton from "@/Components/Core/Button/DangerButton.vue";
 import { usePermissions } from '@/Composables/usePermissions';
+import RestoreMessage from "@/Components/Core/Permissions/RestoreMessage.vue";
+import ConfirmDeleteModal from "@/Components/Core/Modals/ConfirmDeleteModal.vue";
+import {ref} from "vue";
 const props = defineProps({
     user: {
         type: Object,
         required: true
     }
 });
+
+const confirmingDestroy = ref(false);
+const formDestroy = useForm({ password: '' });
+function confirmDestroy() {
+    confirmingDestroy.value = true;
+}
+function closeModalDestroy() {
+    confirmingDestroy.value = false;
+    formDestroy.reset();
+}
+function deleteUser(password) {
+    formDestroy.password = password;
+    formDestroy.delete(route('users.destroy', props.user.id), {
+        preserveScroll: true,
+        onSuccess: () => closeModalDestroy(),
+        onError: () => {},
+        onFinish: () => formDestroy.reset(),
+    });
+}
 </script>
 
 <template>
@@ -19,6 +41,11 @@ const props = defineProps({
         </template>
 
         <div class="py-12">
+            <div v-if="user.deleted_at != null">
+                <RestoreMessage :permission="usePermissions().hasPermission('restore users')" @restore="router.post(route('users.restore',props.user.id))">
+                    This user is deleted. You can restore it, if you have the permission to.
+                </RestoreMessage>
+            </div>
             <div class="mx-auto sm:px-6 lg:px-8 max-w-7xl mt-4">
                 <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg dark:bg-gray-800 text-gray-900 dark:text-gray-100 ">
                     <div class="py-8 px-4 mx-auto max-w-2xl lg:py-16">
@@ -29,7 +56,7 @@ const props = defineProps({
                             {{ user.email }}
                         </p>
 
-                        <dl class="grid grid-cols-2 gap-4">
+                        <dl class="grid grid-cols-2 gap-4" :class="{ 'grid grid-cols-3 gap-4' : props.user.deleted_at != null }">
                             <div>
                                 <dt class="mb-1 font-semibold text-gray-900 dark:text-white">Created At</dt>
                                 <dd class="text-gray-500 dark:text-gray-400">{{ user.created_at }}</dd>
@@ -38,13 +65,17 @@ const props = defineProps({
                                 <dt class="mb-1 font-semibold text-gray-900 dark:text-white">Updated At</dt>
                                 <dd class="text-gray-500 dark:text-gray-400">{{ user.updated_at }}</dd>
                             </div>
+                            <div v-if="props.user.deleted_at">
+                                <dt class="mb-1 font-semibold text-gray-900 dark:text-white">Deleted At</dt>
+                                <dd class="text-gray-500 dark:text-gray-400">{{ user.deleted_at }}</dd>
+                            </div>
                         </dl>
 
                         <div class="mt-6 flex items-center justify-end space-x-4">
-                            <PrimaryButton v-if="usePermissions().hasPermission('edit users')" @click="router.get(route('users.edit', user.id))">
+                            <PrimaryButton v-if="(usePermissions().hasPermission('edit users') && props.user.deleted_at == null ) && props.user.id !== 1" @click="router.get(route('users.edit', user.id))">
                                 Update User
                             </PrimaryButton>
-                            <DangerButton v-if="usePermissions().hasPermission('delete users')">
+                            <DangerButton v-if="(usePermissions().hasPermission('delete users') && props.user.deleted_at == null) && props.user.id !== 1" @click="confirmDestroy()"  >
                                 Delete User
                             </DangerButton>
                         </div>
@@ -71,8 +102,15 @@ const props = defineProps({
                         </div>
                     </div>
                 </div>
-
             </div>
         </div>
     </AuthenticatedLayout>
+
+    <ConfirmDeleteModal
+        :show="confirmingDestroy"
+        :processing="formDestroy.processing"
+        :errors="formDestroy.errors"
+        @close="closeModalDestroy"
+        @confirm="deleteUser"
+    />
 </template>
