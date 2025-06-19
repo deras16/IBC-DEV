@@ -3,9 +3,12 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import PrimaryButton from "@/Components/Core/Button/PrimaryButton.vue";
 import DangerButton from "@/Components/Core/Button/DangerButton.vue";
 import ChartCard from "@/Components/Core/Chart/ChartCard.vue";
-import {router} from "@inertiajs/vue3";
+import {router, useForm} from "@inertiajs/vue3";
 import {TwitterIcon} from "@/Components/Core/Icons/BaseIcons.jsx";
 import {usePermissions} from "@/Composables/usePermissions.js";
+import {ref} from "vue";
+import ConfirmDeleteModal from "@/Components/Core/Modals/ConfirmDeleteModal.vue";
+import RestoreMessage from "@/Components/Core/Permissions/RestoreMessage.vue";
 
 const props = defineProps({
     caseStudy: {
@@ -28,6 +31,25 @@ const series = [
         data: history.map(item => item.follower_count),
     },
 ];
+
+const confirmingDestroy = ref(false);
+const formDestroy = useForm({ password: '' });
+function confirmDestroy() {
+    confirmingDestroy.value = true;
+}
+function closeModalDestroy() {
+    confirmingDestroy.value = false;
+    formDestroy.reset();
+}
+function deleteCaseStudy(password) {
+    formDestroy.password = password;
+    formDestroy.delete(route('case-studies.destroy', props.caseStudy.id), {
+        preserveScroll: true,
+        onSuccess: () => closeModalDestroy(),
+        onError: () => {},
+        onFinish: () => formDestroy.reset(),
+    });
+}
 </script>
 
 <template>
@@ -41,7 +63,12 @@ const series = [
         </template>
 
         <div class="py-12">
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div v-if="caseStudy.deleted_at != null">
+                <RestoreMessage :permission="usePermissions().hasPermission('restore case studies')" @restore="router.post(route('case-studies.restore',props.caseStudy.id))">
+                    This Case Study is deleted. You can restore it, if you have the permission to.
+                </RestoreMessage>
+            </div>
+            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 mt-4">
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg text-gray-900 dark:text-gray-100">
                     <div class="flex flex-wrap my-12">
                         <div class="mx-auto">
@@ -61,17 +88,19 @@ const series = [
                                 <span class="font-semibold">Created at:</span> {{ caseStudy.created_at }}
                                 <br>
                                 <span class="font-semibold">Updated at:</span> {{ caseStudy.updated_at }}
+                                <br>
+                                <span v-if="props.caseStudy.deleted_at" class="font-semibold">Deleted at:</span> {{caseStudy.deleted_at}}
                             </div>
                         </div>
                         <div class="mx-auto items-center text-center">
                             <div class="sm:pt-20">
                                 <div>
-                                    <PrimaryButton @click="router.get(route('case-studies.edit',props.caseStudy.id))">
+                                    <PrimaryButton v-if="(usePermissions().hasPermission('edit case studies') && props.caseStudy.deleted_at == null )" @click="router.get(route('case-studies.edit',props.caseStudy.id))">
                                         Update Case Study
                                     </PrimaryButton>
                                 </div>
                                 <div>
-                                    <DangerButton class="mt-2">
+                                    <DangerButton v-if="(usePermissions().hasPermission('delete case studies') && props.caseStudy.deleted_at == null )" @click="confirmDestroy()" class="mt-2">
                                         Delete Case Study
                                     </DangerButton>
                                 </div>
@@ -91,7 +120,8 @@ const series = [
                             <h5 class="leading-none text-2xl font-bold text-gray-900 dark:text-white pb-2">X (Twitter) Analytics</h5>
                         </div>
                         <div class="flex items-center justify-end">
-                            <PrimaryButton @click="router.post(route('case-studies.loadTwitterData',props.caseStudy.id))">
+                            <PrimaryButton v-if="(usePermissions().hasPermission('load twitter data for case studies') && props.caseStudy.deleted_at == null )"
+                                           @click="router.post(route('case-studies.loadTwitterData',props.caseStudy.id))">
                                 load data
                             </PrimaryButton>
                         </div>
@@ -112,5 +142,13 @@ const series = [
             </div>
         </div>
     </AuthenticatedLayout>
+
+    <ConfirmDeleteModal
+        :show="confirmingDestroy"
+        :processing="formDestroy.processing"
+        :errors="formDestroy.errors"
+        @close="closeModalDestroy"
+        @confirm="deleteCaseStudy"
+    />
 </template>
 

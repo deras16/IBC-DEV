@@ -5,12 +5,14 @@ namespace App\Http\Controllers\CaseStudy;
 use App\Enums\SpaceTopic;
 use App\Enums\SpaceType;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\CaseStudy\CaseStudyDeleteRequest;
 use App\Http\Requests\CaseStudy\CaseStudyRequest;
 use App\Http\Requests\FileRequest;
 use App\Http\Services\Twitter\TwitterService;
 use App\Models\CaseStudy;
 use App\Models\File;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
@@ -24,9 +26,10 @@ class CaseStudyController extends Controller
      */
     public function index(): Response
     {
+        Gate::authorize('viewAny', CaseStudy::class);
         return Inertia::render('CaseStudy/Index', [
-            'caseStudies' => CaseStudy::select('*')->filter(request(['search']))->latest('updated_at')->paginate(5)->withQueryString(),
-            'filters' => \Illuminate\Support\Facades\Request::only(['search']),
+            'caseStudies' => CaseStudy::select('*')->filter(request(['search','trashed']))->latest('updated_at')->paginate(5)->withQueryString(),
+            'filters' => request()->only(['search','trashed']),
         ]);
     }
 
@@ -35,6 +38,7 @@ class CaseStudyController extends Controller
      */
     public function create() : Response
     {
+        Gate::authorize('create', CaseStudy::class);
         return  Inertia::render('CaseStudy/CreateEdit', [
             'spaceTopics' => SpaceTopic::cases(),
             'spaceTypes' => SpaceType::cases()
@@ -46,6 +50,7 @@ class CaseStudyController extends Controller
      */
     public function store(CaseStudyRequest $request): RedirectResponse
     {
+        Gate::authorize('create', CaseStudy::class);
         $data = $request->validated();
         $caseStudy = CaseStudy::create($data);
         if (!empty($data['client_twitter_username'])) {
@@ -73,6 +78,7 @@ class CaseStudyController extends Controller
      */
     public function show(CaseStudy $caseStudy): Response
     {
+        Gate::authorize('view', $caseStudy);
         return Inertia::render('CaseStudy/Show', [
             'caseStudy' => $caseStudy->load(['followerHistory']),
         ]);
@@ -80,6 +86,7 @@ class CaseStudyController extends Controller
 
     public function loadTwitterData(CaseStudy $caseStudy): RedirectResponse
     {
+        Gate::authorize('loadTwitterData', $caseStudy);
         $today = Carbon::today();
         $alreadyLoaded = $caseStudy->followerHistory()
             ->whereDate('loaded_at', $today)
@@ -125,6 +132,7 @@ class CaseStudyController extends Controller
      */
     public function edit(CaseStudy $caseStudy) : Response
     {
+        Gate::authorize('update', $caseStudy);
         return Inertia::render('CaseStudy/CreateEdit', [
             'caseStudy' => $caseStudy,
             'spaceTopics' => SpaceTopic::cases(),
@@ -137,6 +145,7 @@ class CaseStudyController extends Controller
      */
     public function update(CaseStudyRequest $request, CaseStudy $caseStudy): RedirectResponse
     {
+        Gate::authorize('update', $caseStudy);
         $caseStudy->update($request->validated());
         return redirect()->route('case-studies.index')->with([
             'type' => 'success',
@@ -147,69 +156,27 @@ class CaseStudyController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(CaseStudy $caseStudy)
+    public function destroy(CaseStudy $caseStudy, CaseStudyDeleteRequest $request): RedirectResponse
     {
-        //
-    }
+        Gate::authorize('delete', $caseStudy);
 
-    /**
-     * Create a new file for the case study.
-     */
-    public function createFile(CaseStudy $caseStudy): Response
-    {
-        return Inertia::render('CaseStudy/Forms/UploadFile', [
-            'caseStudyId' => $caseStudy->id,
-        ]);
-    }
-
-    /**
-     * Store a new file for the case study.
-     */
-    public function storeFile(FileRequest $request, CaseStudy $caseStudy): RedirectResponse
-    {
         $request->validated();
-        $file = $request->file('file');
-        $path = $file->store('case_studies', 'local');
-
-        $caseStudy->files()->create([
-            'name' => pathinfo($file->hashName(), PATHINFO_FILENAME),
-            'original_name' => $file->getClientOriginalName(),
-            'mime_type' => $file->getMimeType(),
-            'size' => $file->getSize(),
-            'path' => $path,
-        ]);
-
-        return redirect()->route('case-studies.show', $caseStudy)->with([
+        $caseStudy->delete();
+        return redirect()->route('case-studies.index')->with([
             'type' => 'success',
-            'message' => 'File uploaded successfully.'
+            'message' => 'Case study soft deleted successfully.'
         ]);
     }
 
-    /**
-     * Download the specified file.
-     */
-    public function downloadFile(CaseStudy $caseStudy, File $file)
-    {
-        if (!Storage::disk('local')->exists($file->path)) {
-            return redirect()->route('case-studies.show', $caseStudy)->with([
-                'type' => 'error',
-                'message' => 'File not found.'
-            ]);
-        }
-        return Storage::disk('local')->download($file->path, $file->original_name);
-    }
 
-    /**
-     * Remove the specified file from storage.
-     */
-    public function destroyFile(CaseStudy $caseStudy, File $file): RedirectResponse
+    public function restore(CaseStudy $caseStudy): RedirectResponse
     {
-        Storage::disk('local')->delete($file->path);
-        $file->delete();
+        Gate::authorize('restore', $caseStudy);
+        $caseStudy->restore();
 
-        return redirect()->route('case-studies.show', $caseStudy)->with([
+        return redirect()->route('case-studies.index')->with([
             'type' => 'success',
-            'message' => 'File deleted successfully.'
+            'message' => 'Case study restored successfully.'
         ]);
     }
 }

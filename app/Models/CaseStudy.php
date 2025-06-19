@@ -7,11 +7,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class CaseStudy extends Model
 {
     /** @use HasFactory<\Database\Factories\CaseStudyFactory> */
-    use HasFactory;
+    use HasFactory, SoftDeletes;
     protected $guarded = ['id'];
     public function getCreatedAtAttribute(): string
     {
@@ -20,6 +21,10 @@ class CaseStudy extends Model
     public function getUpdatedAtAttribute(): string
     {
         return Carbon::parse($this->attributes['updated_at'])->diffForHumans();
+    }
+    public function getDeletedAtAttribute(): ?string
+    {
+        return $this->attributes['deleted_at'] ? Carbon::parse($this->attributes['deleted_at'])->diffForHumans(): null;
     }
     public function scopeFilter($query, array $filters): void
     {
@@ -35,6 +40,12 @@ class CaseStudy extends Model
                 ->orWhere('listeners','like','%'.$search.'%')
                 ->orWhere('followers','like','%'.$search.'%')
             );
+        })->when($filters['trashed'] ?? null, function ($query, $trashed) {
+            if ($trashed === 'with') {
+                $query->withTrashed();
+            } elseif ($trashed === 'only') {
+                $query->onlyTrashed();
+            }
         });
     }
 
@@ -46,5 +57,11 @@ class CaseStudy extends Model
     public function followerHistory(): MorphMany
     {
         return $this->morphMany(FollowerHistory::class, 'followable');
+    }
+
+    //view soft deleted models
+    public function resolveRouteBinding($value, $field = null)
+    {
+        return $this->where($field ?? 'id', $value)->withTrashed()->firstOrFail();
     }
 }

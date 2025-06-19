@@ -4,6 +4,7 @@ namespace App\Http\Controllers\CaseStudy\Marketing;
 
 use App\Enums\MarketingTopic;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\CaseStudy\CaseStudyDeleteRequest;
 use App\Http\Requests\CaseStudy\MarketingCaseStudyRequest;
 use App\Http\Requests\FileRequest;
 use App\Http\Services\Twitter\TwitterService;
@@ -28,8 +29,8 @@ class MarketingCaseController extends Controller
         Gate::authorize('viewAny', MarketingCaseStudy::class);
         return Inertia::render('CaseStudy/Marketing/Index', [
             'marketingCaseStudies' => MarketingCaseStudy::select('id', 'client_name', 'client_twitter_username')
-                ->filter(request(['search']))->latest('updated_at')->paginate(8)->withQueryString(),
-            'filters' => \Illuminate\Support\Facades\Request::only(['search']),
+                ->filter(request(['search','trashed']))->latest('updated_at')->paginate(8)->withQueryString(),
+            'filters' => request()->only(['search','trashed']),
         ]);
     }
 
@@ -92,6 +93,7 @@ class MarketingCaseController extends Controller
 
     public function loadTwitterData(MarketingCaseStudy $marketingCaseStudy): RedirectResponse
     {
+        Gate::authorize('loadTwitterData', $marketingCaseStudy);
         $today = Carbon::today();
         $alreadyLoaded = $marketingCaseStudy->followerHistory()
             ->whereDate('loaded_at', $today)
@@ -159,9 +161,28 @@ class MarketingCaseController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(MarketingCaseStudy $marketingCaseStudy)
+    public function destroy(MarketingCaseStudy $marketingCaseStudy, CaseStudyDeleteRequest $request): RedirectResponse
     {
         Gate::authorize('delete', $marketingCaseStudy);
+
+        $request->validated();
+        $marketingCaseStudy->delete();
+        return redirect()->route('marketing-case-studies.index')->with([
+            'type' => 'success',
+            'message' => 'Marketing Case study soft deleted successfully.'
+        ]);
+    }
+
+
+    public function restore(MarketingCaseStudy $marketingCaseStudy): RedirectResponse
+    {
+        Gate::authorize('restore', $marketingCaseStudy);
+        $marketingCaseStudy->restore();
+
+        return redirect()->route('marketing-case-studies.index')->with([
+            'type' => 'success',
+            'message' => 'Marketing Case study restored successfully.'
+        ]);
     }
     /**
      * Create a new file for the case study.

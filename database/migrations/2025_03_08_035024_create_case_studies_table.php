@@ -20,6 +20,7 @@ return new class extends Migration
             $table->date('date');
             $table->string('client_twitter_username')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

@@ -23,7 +23,13 @@ class MarketingCaseStudyPolicy
     {
         return $user->hasPermissionTo('view marketing case studies');
     }
-
+    public function loadTwitterData(User $user, MarketingCaseStudy $marketingCaseStudy): bool
+    {
+        if ($marketingCaseStudy->trashed()){
+            return false;
+        }
+        return $user->hasPermissionTo('load twitter data for marketing case studies');
+    }
     /**
      * Determine whether the user can create models.
      */
@@ -37,21 +43,33 @@ class MarketingCaseStudyPolicy
      */
     public function update(User $user, MarketingCaseStudy $marketingCaseStudy): bool
     {
+        if ($marketingCaseStudy->trashed()){
+            return false;
+        }
         return $user->hasPermissionTo('edit marketing case studies');
     }
 
     public function uploadFiles(User $user, MarketingCaseStudy $marketingCaseStudy): bool
     {
+        if ($marketingCaseStudy->trashed()){
+            return false;
+        }
         return $user->hasPermissionTo('upload marketing case studies files');
     }
 
     public function downloadFiles(User $user, MarketingCaseStudy $marketingCaseStudy): bool
     {
+        if ($marketingCaseStudy->trashed()){
+            return false;
+        }
         return $user->hasPermissionTo('download marketing case studies files');
     }
 
     public function deleteFiles(User $user, MarketingCaseStudy $marketingCaseStudy): bool
     {
+        if ($marketingCaseStudy->trashed()){
+            return false;
+        }
         return $user->hasPermissionTo('delete marketing case studies files');
     }
 
@@ -60,6 +78,9 @@ class MarketingCaseStudyPolicy
      */
     public function delete(User $user, MarketingCaseStudy $marketingCaseStudy): bool
     {
+        if ($marketingCaseStudy->trashed()){
+            return false;
+        }
         return $user->hasPermissionTo('delete marketing case studies');
     }
 
@@ -68,6 +89,9 @@ class MarketingCaseStudyPolicy
      */
     public function restore(User $user, MarketingCaseStudy $marketingCaseStudy): bool
     {
+        if ($marketingCaseStudy->trashed()){
+            return $user->hasPermissionTo('restore marketing case studies');
+        }
         return false;
     }
 

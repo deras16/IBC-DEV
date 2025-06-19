@@ -1,16 +1,18 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import {Link, router} from '@inertiajs/vue3';
+import {Link, router, useForm} from '@inertiajs/vue3';
 import DangerButton from "@/Components/Core/Button/DangerButton.vue";
 import PrimaryButton from "@/Components/Core/Button/PrimaryButton.vue";
 import SecondaryButton from "@/Components/Core/Button/SecondaryButton.vue";
 import DataTable from "@/Components/Core/Table/DataTable.vue";
 import {DeleteIcon, DownloadIcon, TwitterIcon} from "@/Components/Core/Icons/BaseIcons.jsx";
 import Pagination from "@/Components/Core/Table/Pagination.vue";
-import {reactive, watch} from "vue";
+import {reactive, ref, watch} from "vue";
 import {debounce} from "lodash";
 import { usePermissions } from '@/Composables/usePermissions';
 import ChartCard from "@/Components/Core/Chart/ChartCard.vue";
+import RestoreMessage from "@/Components/Core/Permissions/RestoreMessage.vue";
+import ConfirmDeleteModal from "@/Components/Core/Modals/ConfirmDeleteModal.vue";
 
 const props = defineProps({
     marketingCaseStudy:{
@@ -44,6 +46,25 @@ const series = [
         data: history.map(item => item.follower_count),
     },
 ];
+
+const confirmingDestroy = ref(false);
+const formDestroy = useForm({ password: '' });
+function confirmDestroy() {
+    confirmingDestroy.value = true;
+}
+function closeModalDestroy() {
+    confirmingDestroy.value = false;
+    formDestroy.reset();
+}
+function deleteCaseStudy(password) {
+    formDestroy.password = password;
+    formDestroy.delete(route('marketing-case-studies.destroy', props.marketingCaseStudy.id), {
+        preserveScroll: true,
+        onSuccess: () => closeModalDestroy(),
+        onError: () => {},
+        onFinish: () => formDestroy.reset(),
+    });
+}
 </script>
 
 <template>
@@ -55,7 +76,12 @@ const series = [
         </template>
 
         <div class="py-12">
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div v-if="marketingCaseStudy.deleted_at != null">
+                <RestoreMessage :permission="usePermissions().hasPermission('restore marketing case studies')" @restore="router.post(route('marketing-case-studies.restore',props.marketingCaseStudy.id))">
+                    This Marketing Case Study is deleted. You can restore it, if you have the permission to.
+                </RestoreMessage>
+            </div>
+            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 mt-4">
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg text-gray-900 dark:text-gray-100">
                     <div class="flex flex-wrap my-12">
                         <div class="mx-auto">
@@ -73,17 +99,21 @@ const series = [
                                 <span class="font-semibold">Created at:</span> {{ props.marketingCaseStudy.created_at }}
                                 <br>
                                 <span class="font-semibold">Updated at:</span> {{ props.marketingCaseStudy.updated_at }}
+                                <br>
+                                <span v-if="props.marketingCaseStudy.deleted_at" class="font-semibold">Deleted at:</span> {{marketingCaseStudy.deleted_at}}
                             </div>
                         </div>
                         <div class="mx-auto items-center text-center">
                             <div class="sm:pt-20">
                                 <div>
-                                    <PrimaryButton v-if="usePermissions().hasPermission('edit marketing case studies')" class="ml-8" @click="router.get(route('marketing-case-studies.edit', props.marketingCaseStudy.id))">
+                                    <PrimaryButton v-if="usePermissions().hasPermission('edit marketing case studies') && props.marketingCaseStudy.deleted_at == null"
+                                                   class="ml-8" @click="router.get(route('marketing-case-studies.edit', props.marketingCaseStudy.id))">
                                         Edit
                                     </PrimaryButton>
                                 </div>
                                 <div>
-                                    <DangerButton v-if="usePermissions().hasPermission('delete marketing case studies')" class="mt-2 ml-8" @click="" >
+                                    <DangerButton v-if="usePermissions().hasPermission('delete marketing case studies') && props.marketingCaseStudy.deleted_at == null"
+                                                  class="mt-2 ml-8" @click="confirmDestroy()" >
                                         Delete
                                     </DangerButton>
                                 </div>
@@ -111,7 +141,7 @@ const series = [
                         </div>
                     </div>
                     <div class="w-full md:w-auto flex flex-col md:flex-row space-y-2 md:space-y-0 items-stretch md:items-center justify-end md:space-x-3 flex-shrink-0">
-                        <PrimaryButton v-if="usePermissions().hasPermission('upload marketing case studies files')" @click="router.get(route('marketing-case-studies.createFile',props.marketingCaseStudy.id))">
+                        <PrimaryButton v-if="usePermissions().hasPermission('upload marketing case studies files')  && props.marketingCaseStudy.deleted_at == null" @click="router.get(route('marketing-case-studies.createFile',props.marketingCaseStudy.id))">
                             Add new document
                         </PrimaryButton>
                     </div>
@@ -129,11 +159,11 @@ const series = [
                         <div class="flex space-x-2">
                             <a :href="route('marketing-case-studies.downloadFile', {marketing_case_study: props.marketingCaseStudy.id, file: row.id})"
                                class="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-widest text-gray-700 shadow-sm transition duration-150 ease-in-out hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-25 dark:border-gray-500 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:focus:ring-offset-gray-800"
-                               v-if="usePermissions().hasPermission('download marketing case studies files')"
+                               v-if="usePermissions().hasPermission('download marketing case studies files')  && props.marketingCaseStudy.deleted_at == null"
                             >
                                 <DownloadIcon className="w-6 h-6 text-gray-800 dark:text-white" />
                             </a>
-                            <SecondaryButton v-if="usePermissions().hasPermission('delete marketing case studies files')" @click="router.delete(route('marketing-case-studies.destroyFile',{marketing_case_study: props.marketingCaseStudy.id, file: row.id}))">
+                            <SecondaryButton v-if="usePermissions().hasPermission('delete marketing case studies files')  && props.marketingCaseStudy.deleted_at == null" @click="router.delete(route('marketing-case-studies.destroyFile',{marketing_case_study: props.marketingCaseStudy.id, file: row.id}))">
                                 <DeleteIcon class="w-6 h-6 text-gray-800 dark:text-white"/>
                             </SecondaryButton>
                         </div>
@@ -158,7 +188,7 @@ const series = [
                             <h5 class="leading-none text-2xl font-bold text-gray-900 dark:text-white pb-2">X (Twitter) Analytics</h5>
                         </div>
                         <div class="flex items-center justify-end">
-                            <PrimaryButton @click="router.post(route('marketing-case-studies.loadTwitterData',props.marketingCaseStudy.id))">
+                            <PrimaryButton v-if="usePermissions().hasPermission('load twitter data for marketing case studies')  && props.marketingCaseStudy.deleted_at == null" @click="router.post(route('marketing-case-studies.loadTwitterData',props.marketingCaseStudy.id))">
                                 load data
                             </PrimaryButton>
                         </div>
@@ -179,4 +209,12 @@ const series = [
             </div>
         </div>
     </AuthenticatedLayout>
+
+    <ConfirmDeleteModal
+        :show="confirmingDestroy"
+        :processing="formDestroy.processing"
+        :errors="formDestroy.errors"
+        @close="closeModalDestroy"
+        @confirm="deleteCaseStudy"
+    />
 </template>

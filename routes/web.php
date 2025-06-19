@@ -16,12 +16,14 @@ Route::middleware(['auth', 'checkUserHasRole'])->group(function () {
 
     Route::resource('case-studies', CaseStudyController::class);
     Route::post('case-studies/{case_study}/load-twitter-data',[CaseStudyController::class, 'loadTwitterData'])->name('case-studies.loadTwitterData');
+    Route::post('case-studies/{case_study}/restore', [CaseStudyController::class, 'restore'])->name('case-studies.restore');
     Route::resource('marketing-case-studies', MarketingCaseController::class);
     Route::get('marketing-case-studies/{marketing_case_study}/file', [MarketingCaseController::class, 'createFile'])->name('marketing-case-studies.createFile');
     Route::get('marketing-case-studies/{marketing_case_study}/file/{file}/download', [MarketingCaseController::class, 'downloadFile'])->name('marketing-case-studies.downloadFile');
     Route::post('marketing-case-studies/{marketing_case_study}/load-twitter-data',[MarketingCaseController::class, 'loadTwitterData'])->name('marketing-case-studies.loadTwitterData');
     Route::post('marketing-case-studies/{marketing_case_study}/file', [MarketingCaseController::class, 'storeFile'])->name('marketing-case-studies.storeFile');
     Route::delete('marketing-case-studies/{marketing_case_study}/file/{file}', [MarketingCaseController::class, 'destroyFile'])->name('marketing-case-studies.destroyFile');
+    Route::post('marketing-case-studies/{marketing_case_study}/restore', [MarketingCaseController::class, 'restore'])->name('marketing-case-studies.restore');
 
     Route::resource('users', UserController::class);
     Route::post('users/{user}/restore', [UserController::class, 'restore'])->name('users.restore');
